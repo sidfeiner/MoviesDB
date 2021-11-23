@@ -9,10 +9,6 @@ class Serializable:
 
 class ToDB:
     @classmethod
-    def table(cls):
-        raise NotImplementedError("table name was not implemented")
-
-    @classmethod
     def export_order(cls) -> List[str]:
         raise NotImplementedError("export order was not implemented")
 
