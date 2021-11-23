@@ -15,9 +15,11 @@ create table movies.keywords
 create table movies.movie_keywords
 (
     id         serial primary key,
-    movie_id   int references movies (id),
-    keyword_id int references keywords (id),
-    constraint unique (movie_id, keyword_id)
+    movie_id   int,
+    keyword_id int,
+    constraint unique (movie_id, keyword_id),
+    foreign key (movie_id) references movies (id),
+    foreign key (keyword_id) references keywords (id)
 );
 
 create table movies.character_names
@@ -45,24 +47,30 @@ create table movies.departments
 create table movies.cast
 (
     id                serial primary key,
-    name_id           int references names (id),
-    character_name_id int references character_names (id),
+    name_id           bigint unsigned,
+    character_name_id bigint unsigned,
     gender            int,
     `order`           int,
     cast_id           int,
-    movie_id          int references movies (id),
-    id_in_cast        int
+    movie_id          int,
+    id_in_cast        int,
+    foreign key (name_id) references names (id),
+    foreign key (character_name_id) references character_names (id),
+    foreign key (movie_id) references movies (id)
 );
 
 create table movies.crew
 (
     id            serial primary key,
-    name_id       int references names (id),
+    name_id       bigint unsigned,
     gender        int,
-    job_id        int references jobs (id),
-    department_id int references departments (id),
+    job_id        bigint unsigned,
+    department_id bigint unsigned,
     movie_id      int,
-    id_in_crew    int
+    id_in_crew    int,
+    foreign key (name_id) references names (id),
+    foreign key (job_id) references jobs (id),
+    foreign key (department_id) references departments (id)
 );
 
 create table movies.genres
@@ -75,9 +83,11 @@ create table movies.genres
 create table movies.movie_genres
 (
     id       serial primary key,
-    movie_id int references movies (id),
-    genre_id int references genres (id),
-    constraint unique (movie_id, genre_id)
+    movie_id int,
+    genre_id int,
+    constraint unique (movie_id, genre_id),
+    foreign key (movie_id) references movies (id),
+    foreign key (genre_id) references genres (id)
 );
 
 create table movies.titles
@@ -97,9 +107,11 @@ create table movies.production_companies
 create table movies.movie_production_companies
 (
     id                    serial primary key,
-    movie_id              int references movies (id),
-    production_company_id int references production_companies (id),
-    constraint unique (movie_id, production_company_id)
+    movie_id              int,
+    production_company_id int,
+    constraint unique (movie_id, production_company_id),
+    foreign key (movie_id) references movies (id),
+    foreign key (production_company_id) references production_companies (id)
 );
 
 
@@ -122,9 +134,11 @@ create table movies.statuses
 create table movies.movie_production_countries
 (
     id         serial primary key,
-    movie_id   int references movies (id),
-    country_id int references countries (id),
-    constraint unique (movie_id, country_id)
+    movie_id   int,
+    country_id int,
+    constraint unique (movie_id, country_id),
+    foreign key (movie_id) references movies (id),
+    foreign key (country_id) references countries (id)
 );
 
 create table movies.languages
@@ -139,16 +153,18 @@ create table movies.languages
 create table movies.movie_spoken_languages
 (
     id          serial primary key,
-    movie_id    int references movies (id),
-    language_id int references languages (id),
-    constraint unique (movie_id, language_id)
+    movie_id    int,
+    language_id bigint unsigned,
+    constraint unique (movie_id, language_id),
+    foreign key (movie_id) references movies (id),
+    foreign key (language_id) references languages (id)
 );
 
 create table movies.movies
 (
     id                int primary key,
-    title_id          int references titles (id),
-    original_title_id int references titles (id),
+    title_id          bigint unsigned,
+    original_title_id bigint unsigned,
     original_language varchar(2),
     popularity        decimal(9, 3),
     release_date      date,
@@ -158,7 +174,10 @@ create table movies.movies
     budget_usd        int,
     revenue_dollars   int,
     runtime_minutes   int,
-    status_id         int references statuses (id),
+    status_id         bigint unsigned,
     vote_avg          decimal(4, 2),
-    vote_cnt          int
+    vote_cnt          int,
+    foreign key (title_id) references titles (id),
+    foreign key (original_title_id) references titles (id),
+    foreign key (status_id) references statuses (id)
 );
