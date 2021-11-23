@@ -55,7 +55,8 @@ class MySQL:
         columns = [mapping.get(column, column) for column in ordered]
         joined_columns = ', '.join(columns)
         placeholders = ', '.join([f"%s" for _ in columns])
-        sql = f"INSERT {'IGNORE' if insert_ignore else ''} INTO {table}({joined_columns}) VALUES({placeholders})"
+        ignore_clause = f'on duplicate key update {columns[0]}={columns[0]} ' if insert_ignore else ''
+        sql = f"INSERT INTO {table}({joined_columns}) VALUES({placeholders}) {ignore_clause}"
         params = [[getattr(item, column) for column in ordered] for item in items]
         logging.info(f"inserting {len(params)} items to table {table}")
         return crsr.executemany(sql, params)
@@ -147,14 +148,9 @@ class BatchValueInserter(BatchObjInserter):
         self.cache = set()
 
     def append(self, item: Any):
-        if self.cache_size > 0 and len(self.cache) < self.cache_size:
-            if item not in self.cache:
-                self.cache.add(item)
-                super().append(Item(item, self.column))
-        else:
-            if item not in self.cache:
-                self.cache.add(item)
-                super().append(Item(item, self.column))
+        if item is None or (isinstance(item, str) and len(item.strip())==0):
+            return
+        super().append(Item(item, self.column))
 
     def extend(self, items: Iterable[Any]):
         for item in items:

@@ -73,6 +73,11 @@ class Keyword(Serializable, ToDB):
             'name': '`keyword`'
         }
 
+    @classmethod
+    def from_dict(cls, d: dict):
+        d['name'] = d['name'].strip()
+        return super().from_dict(d)
+
 
 class Keywords:
     def __init__(self, movie_id: int, keywords: List[Keyword]):

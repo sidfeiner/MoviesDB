@@ -1,3 +1,5 @@
+create schema movies;
+
 create table movies.names
 (
     id   int not null auto_increment primary key,
@@ -15,7 +17,7 @@ create table movies.keywords
 create table movies.character_names
 (
     id             int not null auto_increment primary key,
-    character_name varchar(50),
+    character_name varchar(150),
     constraint unique (character_name)
 );
 
@@ -46,21 +48,21 @@ create table movies.genres
 create table movies.titles
 (
     id    int not null auto_increment primary key,
-    title varchar(50),
+    title varchar(200),
     constraint unique (title)
 );
 
 create table movies.production_companies
 (
     id                 int primary key,
-    production_company varchar(50),
+    production_company varchar(200),
     constraint unique (production_company)
 );
 
 
 create table movies.countries
 (
-    id                      int primary key,
+    id                      int not null auto_increment primary key,
     country_name            varchar(50),
     country_name_iso_3166_1 varchar(2),
     constraint unique (country_name, country_name_iso_3166_1)
@@ -95,9 +97,9 @@ create table movies.movies
     release_date      date,
     tagline           varchar(500),
     adult             bool,
-    overview          varchar(500),
+    overview          varchar(1000),
     budget_usd        int,
-    revenue_dollars   int,
+    revenue_dollars   bigint,
     runtime_minutes   int,
     status_id         int,
     vote_avg          decimal(4, 2),

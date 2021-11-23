@@ -9,7 +9,7 @@ from SRC.API_DATA_RETRIEVE.common.mysql import MySQL, DEFAULT_DB, MySQLAuth, Bat
 from SRC.API_DATA_RETRIEVE.sources.kaggle import sql
 from SRC.API_DATA_RETRIEVE.sources.kaggle.base import *
 
-DEFAULT_INSERT_BATCH_SIZE = 1000
+DEFAULT_INSERT_BATCH_SIZE = 2000
 
 
 class MovieLoader:

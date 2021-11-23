@@ -10,7 +10,7 @@ from SRC.API_DATA_RETRIEVE.sources.kaggle.CreditsLoader import CreditsLoader
 from SRC.API_DATA_RETRIEVE.sources.kaggle.KeywordsLoader import KeywordsLoader
 from SRC.API_DATA_RETRIEVE.sources.kaggle.MovieLoader import MovieLoader
 
-DEFAULT_INSERT_BATCH_SIZE = 1000
+DEFAULT_INSERT_BATCH_SIZE = 2000
 
 
 class KaggleLoader:
