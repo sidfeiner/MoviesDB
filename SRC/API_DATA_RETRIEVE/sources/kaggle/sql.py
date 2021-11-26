@@ -37,7 +37,7 @@ create temporary table temp_movies
     overview          varchar(1000),
     popularity        decimal(9, 3),
     release_date      date,
-    revenue_dollars   bigint,
+    revenue_usd   bigint,
     runtime_minutes   int,
     status            varchar(15),
     tagline           varchar(500),
@@ -50,7 +50,7 @@ create temporary table temp_movies
 
 FINALIZE_MOVIES_TEMP_TABLES_QUERIES = """
 insert into movies.movies(id, adult, budget_usd, original_language, original_title_id, overview, popularity,
-                          release_date, revenue_dollars, runtime_minutes, status_id, tagline, title_id, vote_avg,
+                          release_date, revenue_usd, runtime_minutes, status_id, tagline, title_id, vote_avg,
                           vote_cnt)
 select m.id,
        m.adult,
@@ -60,7 +60,7 @@ select m.id,
        m.overview,
        m.popularity,
        m.release_date,
-       m.revenue_dollars,
+       m.revenue_usd,
        m.runtime_minutes,
        s.id,
        nullif(m.tagline, ''),
@@ -104,8 +104,8 @@ TEMP_CREDITS_TABLES_DLLS = """
 create temporary table temp_cast
 (
     `name`           VARCHAR(50),
-    character_name   VARCHAR(150),
-    gender           VARCHAR(50),
+    character_name   VARCHAR(500),
+    gender_id        int,
     `order`          int,
     cast_id          int,
     movie_id         int,
@@ -115,8 +115,8 @@ create temporary table temp_cast
 create temporary table temp_crew
 (
     name       VARCHAR(50),
-    gender     int,
-    job        VARCHAR(50),
+    gender_id  int,
+    job        VARCHAR(100),
     department VARCHAR(50),
     movie_id   int,
     id_in_crew int
@@ -125,15 +125,15 @@ create temporary table temp_crew
 
 FINALIZE_CREDITS_TEMP_TABLES_QUERIES = """
 
-insert into movies.cast(name_id, character_name_id, gender, `order`, cast_id, movie_id, id_in_cast)
-select n.id, cn.id, m.gender, m.`order`, m.cast_id, m.movie_id, m.id_in_cast
+insert into movies.cast(name_id, character_name_id, gender_id, `order`, cast_id, movie_id, id_in_cast)
+select n.id, cn.id, m.gender_id, m.`order`, m.cast_id, m.movie_id, m.id_in_cast
 from temp_cast m
          left join movies.names n using (name)
          left join movies.character_names cn using (character_name)
 on duplicate key update movie_id=m.movie_id;
 
-insert into movies.crew(name_id, gender, job_id, department_id, movie_id, id_in_crew)
-select n.id, m.gender, j.id, d.id, m.movie_id, m.id_in_crew
+insert into movies.crew(name_id, gender_id, job_id, department_id, movie_id, id_in_crew)
+select n.id, m.gender_id, j.id, d.id, m.movie_id, m.id_in_crew
 from temp_crew m
          left join movies.names n using (name)
          left join movies.jobs j using (job)
