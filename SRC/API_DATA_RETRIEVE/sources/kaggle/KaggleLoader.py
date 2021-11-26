@@ -2,10 +2,10 @@ from typing import Optional
 
 import fire
 
-from SRC.API_DATA_RETRIEVE.common.contract import DEFAULT_DB
 from SRC.API_DATA_RETRIEVE.common.mysql import MySQLAuth
 import logging
 
+from SRC.API_DATA_RETRIEVE.contract import DEFAULT_DB
 from SRC.API_DATA_RETRIEVE.sources.kaggle.CreditsLoader import CreditsLoader
 from SRC.API_DATA_RETRIEVE.sources.kaggle.KeywordsLoader import KeywordsLoader
 from SRC.API_DATA_RETRIEVE.sources.kaggle.MovieLoader import MovieLoader

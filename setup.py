@@ -13,6 +13,8 @@ setup(
         'fire>=0.1.1',
         'simplejson>=3.10.0',
         'requests>=2.12.1',
-        'mysql-connector-python'
+        'mysql-connector-python',
+        'Flask',
+        'flask-mysql'
     ]
 )

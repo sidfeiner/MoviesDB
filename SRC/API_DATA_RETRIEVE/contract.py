@@ -1,4 +1,7 @@
+DEFAULT_DB = 'movies'
+
 MOVIES_TABLE = "movies"
+MOVIES_VIEW = f"v_{MOVIES_TABLE}"
 GENRES_TABLE = "genres"
 LANGUAGES_TABLE = "languages"
 MOVIES_SPOKEN_LANGUAGES_TABLE = "movie_spoken_languages"
@@ -12,7 +15,9 @@ STATUSES_TABLE = "statuses"
 STATUS_COLUMN = "status"
 MOVIE_GENRES_TABLE = "movie_genres"
 CREW_TABLE = "crew"
+CREW_VIEW = f"v_{CREW_TABLE}"
 CAST_TABLE = "cast"
+CAST_VIEW = f"v_{CAST_TABLE}"
 DEPARTMENT_TABLE = "departments"
 DEPARTMENT_COLUMN = "department"
 JOBS_TABLE = "jobs"

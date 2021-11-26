@@ -1,10 +1,10 @@
 import logging
-from typing import Optional, Tuple, List, Dict, Any, Iterable
+from typing import Optional, Tuple, List, Dict, Any, Iterable, Union
 from mysql import connector
 from mysql.connector import cursor
 
-from SRC.API_DATA_RETRIEVE.common.contract import DEFAULT_DB
 from SRC.API_DATA_RETRIEVE.common.formats import ToDB
+from SRC.API_DATA_RETRIEVE.contract import DEFAULT_DB
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 3306
@@ -21,9 +21,14 @@ class MySQLAuth:
 
 
 class MySQL:
-    def __init__(self, auth: MySQLAuth):
+    def __init__(self, auth: Optional[MySQLAuth] = None, conn=None):
+        assert auth is not None or conn is not None
         self.auth = auth
-        self._conn = None  # type: Optional[connector.MySQLConnection]
+        self._conn = conn  # type: Optional[connector.MySQLConnection]
+
+    @classmethod
+    def from_conn(cls, conn):
+        return MySQL()
 
     def _execute(self, crsr: cursor.CursorBase, sql: str, params: Optional[Tuple] = None):
         return crsr.execute(sql, params) if params is not None else crsr.execute(sql)
@@ -31,21 +36,83 @@ class MySQL:
     def get_cursor(self) -> cursor.CursorBase:
         return self._conn.cursor()
 
-    def query_one(self, sql: str, params: Optional[Tuple] = None, crsr: Optional[cursor.CursorBase] = None):
-        final_crsr = crsr or self._conn.cursor()
-        self._execute(final_crsr, sql, params)
-        res = crsr.fetchone()
-        if final_crsr == crsr:
-            crsr.close()
-        return res
+    @staticmethod
+    def _results_as_dict(crsr: cursor.CursorBase, results: List[Tuple]) -> List[dict]:
+        return [{k[0]: v for (k, v) in zip(crsr.description, res)} for res in results]
 
-    def query_all(self, sql: str, params: Optional[Tuple] = None, crsr: Optional[cursor.CursorBase] = None):
+    def fetch_one(self, sql: str, params: Optional[Tuple] = None, crsr: Optional[cursor.CursorBase] = None,
+                  as_dict: bool = False):
+        """Low level query
+        :param sql: raw SQL
+        :param params: params for the query
+        :param crsr: Optional cursor. If not given, one will be created and closed at the end of the query
+        :param as_dict: If True, every record will be returned as a dictionary where the key is the column's name
+        :return: None if no record was found, single record otherwise (tuple if as_dict = False, dict if as_dict = True)
+        """
         final_crsr = crsr or self._conn.cursor()
         self._execute(final_crsr, sql, params)
-        res = crsr.fetchall()
+        res = final_crsr.fetchone()
         if final_crsr == crsr:
             crsr.close()
-        return res
+        return self._results_as_dict(final_crsr, res) if as_dict else res
+
+    def fetch_limit(self, sql: str, params: Optional[Union[Tuple, Dict]] = None,
+                    crsr: Optional[cursor.CursorBase] = None,
+                    as_dict: bool = False, limit: Optional[int] = None):
+        """Low level query
+        :param sql: raw SQL
+        :param params: params for the query
+        :param crsr: Optional cursor. If not given, one will be created and closed at the end of the query
+        :param as_dict: If True, every record will be returned as a dictionary where the key is the column's name
+        :param limit: Maximum amount of records to return. If None, no limit is enforced
+        :return: List of records (tuples if as_dict = False, dict if as_dict = True)
+        """
+        sql = f"""
+        {sql}
+        {"" if limit is None else f"limit {limit}"}
+        """
+        final_crsr = crsr or self._conn.cursor()
+        self._execute(final_crsr, sql, params)
+        res = final_crsr.fetchall()
+        if final_crsr == crsr:
+            crsr.close()
+        return self._results_as_dict(final_crsr, res) if as_dict else res
+
+    def fetch_all(self, sql: str, params: Optional[Union[Tuple, Dict]] = None,
+                  crsr: Optional[cursor.CursorBase] = None,
+                  as_dict: bool = False):
+        return self.fetch_limit(sql, params, crsr, as_dict, None)
+
+    def query_limit(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None,
+                    crsr: Optional[cursor.CursorBase] = None, as_dict: bool = False, limit: Optional[int] = None):
+        """Higher level query. Build the SQL based on the given params
+        :param table: Table to query
+        :param projection: Columns to return. If None, returns all columns
+        :param filters: Filters for where clause. If None, return everything
+        :param crsr: Optional cursor. If not given, one will be created and closed at the end of the query
+        :param as_dict: If True, every record will be returned as a dictionary where the key is the column's name
+        :param limit: Maximum amount of records to return. If None, no limit is enforced
+        :return: List of records (tuples if as_dict = False, dict if as_dict = True)
+        """
+        projection = projection or ['*']
+        filters = filters or dict()
+        where_clauses = []
+        where_values = []
+        for column, value in filters.items():
+            where_clauses.append(f"{column} = %s")
+            where_values.append(value)
+
+        sql = f"""
+        select {', '.join(projection)}
+        from {table}
+        where {' and '.join(where_clauses)}
+        {'' if limit is None else f"limit {limit}"}
+        """
+        return self.fetch_all(sql, tuple(where_values), crsr, as_dict)
+
+    def query_all(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None,
+                  crsr: Optional[cursor.CursorBase] = None, as_dict: bool = False):
+        return self.query_limit(table, projection, filters, crsr, as_dict, None)
 
     def insert_many(self, table: str, items: List[ToDB], crsr: cursor.CursorBase, insert_ignore: bool = False):
         if len(items) == 0:
@@ -148,7 +215,7 @@ class BatchValueInserter(BatchObjInserter):
         self.cache = set()
 
     def append(self, item: Any):
-        if item is None or (isinstance(item, str) and len(item.strip())==0):
+        if item is None or (isinstance(item, str) and len(item.strip()) == 0):
             return
         super().append(Item(item, self.column))
 
