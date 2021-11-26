@@ -1,7 +1,11 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from SRC.API_DATA_RETRIEVE import contract
 from SRC.API_DATA_RETRIEVE.common.formats import Serializable, ToDB
+
+
+def clean_gender(gender: int) -> Optional[int]:
+    return gender if gender != 0 else None
 
 
 class CastMember(Serializable, ToDB):
@@ -10,7 +14,7 @@ class CastMember(Serializable, ToDB):
         self.id = id
         self.name = name
         self.character = character
-        self.gender = gender
+        self.gender = clean_gender(gender)
         self.cast_id = cast_id
         self.movie_id = movie_id
         self.order = order
@@ -25,7 +29,8 @@ class CastMember(Serializable, ToDB):
             'name': '`name`',
             'character': 'character_name',
             'order': '`order`',
-            'id': 'id_in_cast'
+            'id': 'id_in_cast',
+            'gender': 'gender_id',
         }
 
 
@@ -36,14 +41,15 @@ class CrewMember(Serializable, ToDB):
         self.name = name
         self.job = job
         self.department = department
-        self.gender = gender
+        self.gender = clean_gender(gender)
         self.movie_id = movie_id
 
     @classmethod
     def override_target_names(cls) -> Dict[str, str]:
         return {
             'name': '`name`',
-            'id': 'id_in_crew'
+            'id': 'id_in_crew',
+            'gender': 'gender_id',
         }
 
     @classmethod
@@ -249,7 +255,7 @@ class Movie(ToDB):
     def override_target_names(cls) -> Dict[str, str]:
         return {
             'budget': 'budget_usd',
-            'revenue': 'revenue_dollars',
+            'revenue': 'revenue_usd',
             'runtime': 'runtime_minutes',
             'vote_average': 'vote_avg',
             'vote_count': 'vote_cnt'

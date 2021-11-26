@@ -1,82 +1,93 @@
 create schema movies;
 
-create table movies.names
+create table genders
+(
+    id     int not null primary key,
+    gender varchar(10),
+    constraint unique (gender)
+);
+
+insert into genders(id, gender)
+VALUES (1, 'female'),
+       (2, 'male');
+
+create table names
 (
     id   int not null auto_increment primary key,
     name varchar(50),
     constraint unique (name)
 );
-create index names_name_idx on movies.names (name(15));
+create index names_name_idx on names (name(15));
 
-create table movies.keywords
+create table keywords
 (
     id      int primary key,
     keyword varchar(50),
     constraint unique (keyword)
 );
-create index keywords_keyword_idx on movies.keywords (keyword(15));
+create index keywords_keyword_idx on keywords (keyword(15));
 
 
-create table movies.character_names
+create table character_names
 (
     id             int not null auto_increment primary key,
-    character_name varchar(150),
+    character_name varchar(500),
     constraint unique (character_name)
 );
-create index character_names_character_name_idx on movies.character_names (character_name(20));
+create index character_names_character_name_idx on character_names (character_name(20));
 
-create table movies.jobs
+create table jobs
 (
     id  int not null auto_increment primary key,
-    job varchar(50),
+    job varchar(100),
     constraint unique (job)
 );
-create index jobs_jobs_idx on movies.jobs (job);
+create index jobs_jobs_idx on jobs (job);
 
 
-create table movies.departments
+create table departments
 (
     id         int not null auto_increment primary key,
     department varchar(50),
     constraint unique (department)
 );
-create index departments_department_idx on movies.departments (department);
+create index departments_department_idx on departments (department);
 
-create table movies.genres
+create table genres
 (
     id    int primary key,
     genre varchar(20),
     constraint unique (genre)
 );
-create index genres_genre_idx on movies.genres (genre);
+create index genres_genre_idx on genres (genre);
 
-create table movies.titles
+create table titles
 (
     id    int not null auto_increment primary key,
     title varchar(200),
     constraint unique (title)
 );
-create index titles_title_idx on movies.titles (title(30));
+create index titles_title_idx on titles (title(30));
 
-create table movies.production_companies
+create table production_companies
 (
     id                 int primary key,
     production_company varchar(200),
     constraint unique (production_company)
 );
-create index production_companies_production_company_idx on movies.production_companies (production_company(30));
+create index production_companies_production_company_idx on production_companies (production_company(30));
 
-create table movies.countries
+create table countries
 (
     id                      int not null auto_increment primary key,
     country_name            varchar(50),
     country_name_iso_3166_1 varchar(2),
     constraint unique (country_name, country_name_iso_3166_1)
 );
-create index countries_country_name_idx on movies.countries (country_name);
-create index countries_country_name_iso_3166_1_name_idx on movies.countries (country_name_iso_3166_1);
+create index countries_country_name_idx on countries (country_name);
+create index countries_country_name_iso_3166_1_name_idx on countries (country_name_iso_3166_1);
 
-create table movies.languages
+create table languages
 (
     id                 int not null auto_increment primary key,
     language           varchar(20),
@@ -84,20 +95,19 @@ create table movies.languages
     constraint unique (language),
     constraint unique (language_iso_639_1)
 );
-create index languages_language_name_idx on movies.languages (language);
-create index languages_language_iso_639_1_name_idx on movies.languages (language_iso_639_1);
+create index languages_language_name_idx on languages (language);
+create index languages_language_iso_639_1_name_idx on languages (language_iso_639_1);
 
 
-create table movies.statuses
+create table statuses
 (
     id     int not null auto_increment primary key,
     status varchar(15),
     constraint unique (status)
 );
-create index statuses_status_idx on movies.statuses (status);
+create index statuses_status_idx on statuses (status);
 
-
-create table movies.movies
+create table movies
 (
     id                int primary key,
     title_id          int,
@@ -109,7 +119,7 @@ create table movies.movies
     adult             bool,
     overview          varchar(1000),
     budget_usd        int,
-    revenue_dollars   bigint,
+    revenue_usd       bigint,
     runtime_minutes   int,
     status_id         int,
     vote_avg          decimal(4, 2),
@@ -121,7 +131,7 @@ create table movies.movies
     fulltext key (overview)
 );
 
-create table movies.movie_keywords
+create table movie_keywords
 (
     id         int not null auto_increment primary key,
     movie_id   int,
@@ -133,36 +143,38 @@ create table movies.movie_keywords
 
 
 
-create table movies.cast
+create table cast
 (
     id                int not null auto_increment primary key,
     name_id           int,
     character_name_id int,
-    gender            int,
+    gender_id         int,
     `order`           int,
     cast_id           int,
     movie_id          int,
     id_in_cast        int,
     foreign key (name_id) references names (id),
     foreign key (character_name_id) references character_names (id),
+    foreign key (gender_id) references genders (id),
     foreign key (movie_id) references movies (id)
 );
 
-create table movies.crew
+create table crew
 (
     id            int not null auto_increment primary key,
     name_id       int,
-    gender        int,
+    gender_id     int,
     job_id        int,
     department_id int,
     movie_id      int,
     id_in_crew    int,
     foreign key (name_id) references names (id),
+    foreign key (gender_id) references genders (id),
     foreign key (job_id) references jobs (id),
     foreign key (department_id) references departments (id)
 );
 
-create table movies.movie_genres
+create table movie_genres
 (
     id       int not null auto_increment primary key,
     movie_id int,
@@ -173,7 +185,7 @@ create table movies.movie_genres
 );
 
 
-create table movies.movie_production_companies
+create table movie_production_companies
 (
     id                    int not null auto_increment primary key,
     movie_id              int,
@@ -185,7 +197,7 @@ create table movies.movie_production_companies
 
 
 
-create table movies.movie_production_countries
+create table movie_production_countries
 (
     id         int not null auto_increment primary key,
     movie_id   int,
@@ -195,7 +207,7 @@ create table movies.movie_production_countries
     foreign key (country_id) references countries (id)
 );
 
-create table movies.movie_spoken_languages
+create table movie_spoken_languages
 (
     id          int not null auto_increment primary key,
     movie_id    int,
@@ -204,3 +216,42 @@ create table movies.movie_spoken_languages
     foreign key (movie_id) references movies (id),
     foreign key (language_id) references languages (id)
 );
+
+create view v_movies as
+select m.id,
+       t.title  as title,
+       ot.title as original_title,
+       m.original_language,
+       m.popularity,
+       m.release_date,
+       m.tagline,
+       m.adult,
+       m.overview,
+       m.budget_usd,
+       m.revenue_usd,
+       m.runtime_minutes,
+       s.status,
+       m.vote_avg,
+       m.vote_cnt
+from movies m
+         left join titles t on m.title_id = t.id
+         left join titles ot on m.original_title_id = ot.id
+         left join statuses s on m.status_id = s.id;
+
+create view v_cast as
+select cast.id, n.name, cn.character_name, gender, `order`, m.title as movie_title
+from cast
+         left join names n on cast.name_id = n.id
+         left join character_names cn on cast.character_name_id = cn.id
+         left join genders g on cast.gender_id = g.id
+         left join v_movies m on cast.movie_id = m.id;
+
+create view v_crew as
+select crew.id, n.name, gender, j.job, d.department, m.title as movie_title
+from crew
+         left join names n on crew.name_id = n.id
+         left join genders g on crew.gender_id = g.id
+         left join jobs j on crew.job_id = j.id
+         left join departments d on crew.department_id = d.id
+         left join v_movies m on crew.movie_id = m.id;
+
