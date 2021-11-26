@@ -254,4 +254,3 @@ from crew
          left join jobs j on crew.job_id = j.id
          left join departments d on crew.department_id = d.id
          left join v_movies m on crew.movie_id = m.id;
-

@@ -41,7 +41,7 @@ def get_data(helper: mysql_common.MySQL, table: str, invalid_cols_func: Callable
     return jsonify(res)
 
 
-@app.route("/movies")
+@app.route("/_query/movies")
 def get_movies():
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
@@ -49,7 +49,7 @@ def get_movies():
     return get_data(helper, contract.MOVIES_VIEW, validator.find_invalid_movies_columns)
 
 
-@app.route("/crew")
+@app.route("/_query/crew")
 def get_crew():
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
@@ -57,7 +57,7 @@ def get_crew():
     return get_data(helper, contract.CREW_VIEW, validator.find_invalid_crew_columns)
 
 
-@app.route("/cast")
+@app.route("/_query/cast")
 def get_cast():
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
@@ -65,7 +65,7 @@ def get_cast():
     return get_data(helper, contract.CAST_VIEW, validator.find_invalid_cast_columns)
 
 
-@app.route("/lookalike/movie")
+@app.route("/lookalike/movies")
 def get_movie_lookalike():
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
@@ -84,6 +84,23 @@ def get_movie_lookalike():
         'lookalikes': [{k: v for (k, v) in movie.items() if k not in ['requested_movie', 'requested_movie_id']} for
                        movie in res]
     })
+
+
+@app.route("/misc/best_profit_per_worker")
+def get_best_profit_per_worker():
+    conn = mysql.get_db()
+    helper = mysql_common.MySQL(conn=conn)
+    validator = Validator.get(helper)
+
+    genre = request.args.get('genre')
+    if genre is None:
+        return "you did not given a genre"
+    if len(validator.find_invalid_genres([genre])) > 0:
+        return "invalid genre given", 400
+    limit = request.args.get('limit', DEFAULT_LIMIT)
+    genre_id = helper.query_one(contract.GENRES_TABLE, ['id'], {'genre': genre})[0]
+    res = helper.fetch_limit(sql.BEST_PROFIT_PER_MEMBER, (genre_id,), as_dict=True, limit=limit)
+    return jsonify(res)
 
 
 if __name__ == '__main__':

@@ -51,3 +51,24 @@ where m1.id = %(movie_id)s
 order by lookalike_score desc,
          m2.vote_avg desc
 """
+
+BEST_PROFIT_PER_MEMBER = f"""
+with movie_members_amt as (
+    select movie_id, count(distinct name_id) as members
+    from (
+             select movie_id, name_id
+             from cast
+             union all
+             select movie_id, name_id
+             from crew
+         ) a
+    group by 1
+)
+select m.id as movie_id, t.title as movie_name, (m.revenue_usd - m.budget_usd) / mm.members as profit_rate
+from movies m
+         join movie_members_amt mm on m.id = mm.movie_id
+         join movie_genres mg on m.id = mg.movie_id
+         join titles t on m.title_id = t.id
+where genre_id = %s and m.revenue_usd is not null and m.budget_usd is not null
+order by 1, rate desc
+"""

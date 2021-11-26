@@ -83,6 +83,35 @@ class MySQL:
                   as_dict: bool = False):
         return self.fetch_limit(sql, params, crsr, as_dict, None)
 
+    def _generate_query(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None):
+        projection = projection or ['*']
+        filters = filters or dict()
+        where_clauses = []
+        where_values = []
+        for column, value in filters.items():
+            where_clauses.append(f"{column} = %s")
+            where_values.append(value)
+
+        sql = f"""
+                select {', '.join(projection)}
+                from {table}
+                {"where" if len(where_clauses) > 0 else ""} {' and '.join(where_clauses)}
+                """
+        return sql, where_values
+
+    def query_one(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None,
+                  crsr: Optional[cursor.CursorBase] = None, as_dict: bool = False):
+        """Higher level query. Build the SQL based on the given params
+        :param table: Table to query
+        :param projection: Columns to return. If None, returns all columns
+        :param filters: Filters for where clause. If None, return everything
+        :param crsr: Optional cursor. If not given, one will be created and closed at the end of the query
+        :param as_dict: If True, every record will be returned as a dictionary where the key is the column's name
+        :return: None if no record was found, single record otherwise (tuple if as_dict = False, dict if as_dict = True)
+        """
+        sql, where_values = self._generate_query(table, projection, filters)
+        return self.fetch_one(sql, tuple(where_values), crsr, as_dict)
+
     def query_limit(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None,
                     crsr: Optional[cursor.CursorBase] = None, as_dict: bool = False, limit: Optional[int] = None):
         """Higher level query. Build the SQL based on the given params
@@ -94,20 +123,9 @@ class MySQL:
         :param limit: Maximum amount of records to return. If None, no limit is enforced
         :return: List of records (tuples if as_dict = False, dict if as_dict = True)
         """
-        projection = projection or ['*']
-        filters = filters or dict()
-        where_clauses = []
-        where_values = []
-        for column, value in filters.items():
-            where_clauses.append(f"{column} = %s")
-            where_values.append(value)
-
-        sql = f"""
-        select {', '.join(projection)}
-        from {table}
-        where {' and '.join(where_clauses)}
-        {'' if limit is None else f"limit {limit}"}
-        """
+        sql, where_values = self._generate_query(table, projection, filters)
+        if limit is not None:
+            sql += f" limit {limit}"
         return self.fetch_all(sql, tuple(where_values), crsr, as_dict)
 
     def query_all(self, table: str, projection: List[str] = None, filters: Dict[str, Any] = None,
