@@ -9,6 +9,7 @@ from SRC.API_DATA_RETRIEVE import contract
 from SRC.API_DATA_RETRIEVE.common import mysql as mysql_common
 from SRC.API_DATA_RETRIEVE.contract import DEFAULT_DB
 from SRC.SERVER import sql
+from SRC.SERVER.lookup import Lookup
 from SRC.SERVER.validation import Validator
 
 DEFAULT_LIMIT = 1000
@@ -20,6 +21,7 @@ app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['MYSQL_PWD']
 app.config['MYSQL_DATABASE_DB'] = os.environ.get('MYSQL_DB', DEFAULT_DB)
 app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_HOST', mysql_common.DEFAULT_HOST)
 mysql = MySQL(app)
+lookup = Lookup()
 
 
 def as_dict_of_lists(d: MultiDict) -> Dict[str, List[str]]:
@@ -86,7 +88,7 @@ def get_movie_lookalike():
     })
 
 
-@app.route("/misc/best_profit_per_worker")
+@app.route("/misc/bestProfitPerWorker")
 def get_best_profit_per_worker():
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
@@ -98,10 +100,34 @@ def get_best_profit_per_worker():
     if len(validator.find_invalid_genres([genre])) > 0:
         return "invalid genre given", 400
     limit = request.args.get('limit', DEFAULT_LIMIT)
-    genre_id = helper.query_one(contract.GENRES_TABLE, ['id'], {'genre': genre})[0]
+    genre_id = lookup.lookup_one(helper, contract.GENRES_TABLE, 'genre', genre, 'id')
     res = helper.fetch_limit(sql.BEST_PROFIT_PER_MEMBER, (genre_id,), as_dict=True, limit=limit)
     return jsonify(res)
 
 
+@app.route("/misc/loyalCrewMembers")
+def get_loyal_crew_members():
+    conn = mysql.get_db()
+    helper = mysql_common.MySQL(conn=conn)
+    validator = Validator.get(helper)
+
+    args_lists = as_dict_of_lists(request.args)
+    jobs = args_lists['job']
+    limit = args_lists.pop('limit') if 'limit' in args_lists else DEFAULT_LIMIT
+    bad_jobs = validator.find_invalid_jobs(jobs)
+    if len(bad_jobs) > 0:
+        return f"invalid job given: {', '.join(bad_jobs)}", 400
+    if len(jobs) > 0:
+        job_ids = lookup.lookup_many(helper, contract.JOBS_TABLE, 'job', jobs, 'id')
+    else:
+        job_ids = {}
+    res = helper.fetch_limit(
+        sql.get_loyal_crew_members_query(len(job_ids)), tuple(job_ids.values()), as_dict=True, limit=limit
+    )
+    for item in res:
+        item['jobs'] = item['jobs'].split(',')
+    return jsonify(res)
+
+
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5050)

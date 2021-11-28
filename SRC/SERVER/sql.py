@@ -1,3 +1,5 @@
+from typing import List
+
 from SRC.API_DATA_RETRIEVE import contract
 
 LOOKALIKE_MOVIES = f"""
@@ -70,5 +72,32 @@ from movies m
          join movie_genres mg on m.id = mg.movie_id
          join titles t on m.title_id = t.id
 where genre_id = %s and m.revenue_usd is not null and m.budget_usd is not null
-order by 1, rate desc
+order by 1, profit_rate desc
 """
+
+_loyal_crew_members_query = """
+with crew_company as (
+    select crew.name_id, crew.job_id, mpc.production_company_id
+    from crew
+             join movie_production_companies mpc on crew.movie_id = mpc.movie_id
+)
+select n.name, pc.production_company, group_concat(distinct jobs.job) as jobs
+from crew_company cc1
+         join names n on cc1.name_id = n.id
+         join production_companies pc on cc1.production_company_id = pc.id
+         join jobs on cc1.job_id = jobs.id
+where exists(select 1 from crew where cc1.name_id = crew.name_id {jobs_filter})
+    and not exists(select 1
+                 from crew_company cc2
+                 where cc1.name_id = cc2.name_id
+                   and cc1.production_company_id <> cc2.production_company_id)
+group by 1, 2
+"""
+
+
+def get_loyal_crew_members_query(jobs_amt: int) -> str:
+    if jobs_amt == 0:
+        jobs_filter = ''
+    else:
+        jobs_filter = f"and crew.job_id in ({', '.join(['%s'])})"
+    return _loyal_crew_members_query.format(jobs_filter=jobs_filter)

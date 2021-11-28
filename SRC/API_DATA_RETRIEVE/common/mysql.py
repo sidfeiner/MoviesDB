@@ -26,10 +26,6 @@ class MySQL:
         self.auth = auth
         self._conn = conn  # type: Optional[connector.MySQLConnection]
 
-    @classmethod
-    def from_conn(cls, conn):
-        return MySQL()
-
     def _execute(self, crsr: cursor.CursorBase, sql: str, params: Optional[Tuple] = None):
         return crsr.execute(sql, params) if params is not None else crsr.execute(sql)
 
@@ -89,8 +85,13 @@ class MySQL:
         where_clauses = []
         where_values = []
         for column, value in filters.items():
-            where_clauses.append(f"{column} = %s")
-            where_values.append(value)
+            if isinstance(value, (list, tuple)):
+                if len(value) > 0:
+                    where_clauses.append(f"{column} in ({', '.join(['%s'] * len(value))})")
+                    where_values.extend(value)
+            else:
+                where_clauses.append(f"{column} = %s")
+                where_values.append(value)
 
         sql = f"""
                 select {', '.join(projection)}

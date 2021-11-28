@@ -15,6 +15,7 @@ setup(
         'requests>=2.12.1',
         'mysql-connector-python',
         'Flask',
-        'flask-mysql'
+        'flask-mysql',
+        'memoization'
     ]
 )
