@@ -12,7 +12,7 @@ class CastMember(Serializable, ToDB):
     def __init__(self, id: int, name: str, cast_id: int, character: str, gender: int, order: int, movie_id: str,
                  *args, **kwargs):
         self.id = id
-        self.name = name
+        self.name = name.strip()
         self.character = character
         self.gender = clean_gender(gender)
         self.cast_id = cast_id
@@ -38,7 +38,7 @@ class CrewMember(Serializable, ToDB):
     def __init__(self, id: int, name: str, job: str, gender: int, department: str, movie_id: str,
                  *args, **kwargs):
         self.id = id
-        self.name = name
+        self.name = name.strip()
         self.job = job
         self.department = department
         self.gender = clean_gender(gender)
@@ -67,7 +67,7 @@ class Credits:
 class Keyword(Serializable, ToDB):
     def __init__(self, id: int, name: str):
         self.id = id
-        self.name = name
+        self.name = name.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -78,11 +78,6 @@ class Keyword(Serializable, ToDB):
         return {
             'name': '`keyword`'
         }
-
-    @classmethod
-    def from_dict(cls, d: dict):
-        d['name'] = d['name'].strip()
-        return super().from_dict(d)
 
 
 class Keywords:
@@ -104,7 +99,7 @@ class MovieKeyword(ToDB):
 class Company(Serializable, ToDB):
     def __init__(self, id: int, name: str, *args, **kwargs):
         self.id = id
-        self.name = name
+        self.name = name.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -120,7 +115,7 @@ class Company(Serializable, ToDB):
 class MovieProductionCompany(ToDB):
     def __init__(self, movie_id: int, company: str, *args, **kwargs):
         self.movie_id = movie_id
-        self.company = company
+        self.company = company.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -135,8 +130,8 @@ class MovieProductionCompany(ToDB):
 
 class Country(Serializable, ToDB):
     def __init__(self, name: str, iso_3166_1: str):
-        self.name = name
-        self.iso_3166_1 = iso_3166_1
+        self.name = name.strip()
+        self.iso_3166_1 = iso_3166_1.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -153,7 +148,7 @@ class Country(Serializable, ToDB):
 class MovieProductionCountry(ToDB):
     def __init__(self, movie_id: int, country: str):
         self.movie_id = movie_id
-        self.country = country
+        self.country = country.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -162,8 +157,8 @@ class MovieProductionCountry(ToDB):
 
 class Language(Serializable, ToDB):
     def __init__(self, name: str, iso_639_1: str):
-        self.name = name
-        self.iso_639_1 = iso_639_1
+        self.name = name.strip()
+        self.iso_639_1 = iso_639_1.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -180,7 +175,7 @@ class Language(Serializable, ToDB):
 class MovieLanguage(ToDB):
     def __init__(self, movie_id: int, language: str):
         self.movie_id = movie_id
-        self.language = language
+        self.language = language.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -190,7 +185,7 @@ class MovieLanguage(ToDB):
 class Genre(Serializable, ToDB):
     def __init__(self, id: int, name: str):
         self.id = id
-        self.name = name
+        self.name = name.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -206,7 +201,7 @@ class Genre(Serializable, ToDB):
 class MovieGenre(ToDB):
     def __init__(self, movie_id: int, name: str):
         self.movie_id = movie_id
-        self.name = name
+        self.name = name.strip()
 
     @classmethod
     def export_order(cls) -> List[str]:
@@ -241,7 +236,7 @@ class Movie(ToDB):
         self.revenue = revenue
         self.runtime = runtime
         self.spoken_languages = spoken_languages  # type: List[Language]
-        self.status = status
+        self.status = status.strip() if status is not None else None
         self.tagline = tagline
         self.vote_average = vote_average
         self.vote_count = vote_count
