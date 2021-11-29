@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from SRC.API_DATA_RETRIEVE import contract
 
@@ -101,3 +101,22 @@ def get_loyal_crew_members_query(jobs_amt: int) -> str:
     else:
         jobs_filter = f"and crew.job_id in ({', '.join(['%s'])})"
     return _loyal_crew_members_query.format(jobs_filter=jobs_filter)
+
+
+_genres_dist_by_bool_query = """
+select genres.genre, round(pct, 2) as pct
+from (
+         select distinct genre_id,
+                         100 * count(*) over (partition by genre_id) / count(*) over () as pct
+         from movies
+                  join movie_genres mg on movies.id = mg.movie_id
+         {match_clause}
+     ) a
+         join genres on a.genre_id = genres.id
+order by pct desc
+"""
+
+
+def get_genres_dist_by_bool_query(with_match: bool):
+    match_clause = f"where MATCH(overview, tagline) AGAINST(%s IN BOOLEAN MODE)" if with_match else ''
+    return _genres_dist_by_bool_query.format(match_clause=match_clause)

@@ -129,5 +129,20 @@ def get_loyal_crew_members():
     return jsonify(res)
 
 
+@app.route("/misc/genreDistribution")
+def get_genre_distribution():
+    conn = mysql.get_db()
+    helper = mysql_common.MySQL(conn=conn)
+
+    match_query = request.args.get('query')
+
+    res = helper.fetch_limit(
+        sql.get_genres_dist_by_bool_query(match_query is not None), [match_query] if match_query is not None else None,
+        as_dict=True
+    )
+
+    return jsonify(res)
+
+
 if __name__ == '__main__':
     app.run(port=5050)

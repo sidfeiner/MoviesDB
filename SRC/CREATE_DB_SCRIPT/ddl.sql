@@ -128,7 +128,8 @@ create table movies
     foreign key (original_title_id) references titles (id),
     foreign key (status_id) references statuses (id),
     fulltext key (tagline),
-    fulltext key (overview)
+    fulltext key (overview),
+    fulltext key (overview, tagline)
 );
 
 create table movie_keywords
