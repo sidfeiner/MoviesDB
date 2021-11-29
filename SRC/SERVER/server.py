@@ -45,6 +45,12 @@ def get_data(helper: mysql_common.MySQL, table: str, invalid_cols_func: Callable
 
 @app.route("/_query/movies")
 def get_movies():
+    """
+    Query `movies` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
+    You can also pass `projection` parameters to return specific columns. If no projection parameter is passed,
+    all columns will be returned.
+    If desired, you can limit results with `limit` parameter
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
@@ -53,6 +59,12 @@ def get_movies():
 
 @app.route("/_query/crew")
 def get_crew():
+    """
+    Query `crew` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
+    You can also pass `projection` parameters to return specific columns. If no projection parameter is passed,
+    all columns will be returned.
+    If desired, you can limit results with `limit` parameter
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
@@ -61,6 +73,12 @@ def get_crew():
 
 @app.route("/_query/cast")
 def get_cast():
+    """
+    Query `cast` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
+    You can also pass `projection` parameters to return specific columns. If no projection parameter is passed,
+    all columns will be returned.
+    If desired, you can limit results with `limit` parameter
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
@@ -69,6 +87,10 @@ def get_cast():
 
 @app.route("/lookalike/movies")
 def get_movie_lookalike():
+    """
+    Given a movie ID (passed through `id` parameter), return lookalike movies. Whether a movie is related,
+    is based on the genre, the crew members, cast and results are sorted by popularity.
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     movie_id = request.args.get('id')
@@ -90,6 +112,13 @@ def get_movie_lookalike():
 
 @app.route("/misc/bestProfitPerWorker")
 def get_best_profit_per_worker():
+    """
+    For a given genre, return the movie with the best profit per worker.
+    This is calculated by dividing the net revenue (gross - budget) between all workers (cast + crew),
+    meaning the result is movies where every worker had in the average, the biggest contribution to the movie's
+    financial success.
+    genre must be passed through `genre` parameter.
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
@@ -107,6 +136,13 @@ def get_best_profit_per_worker():
 
 @app.route("/misc/loyalCrewMembers")
 def get_loyal_crew_members():
+    """
+    Returns crew members that are local to their production company, meaning they work ONLY with a single
+    production company.
+    API returns data for a specific job (or jobs). If no job is given, all jobs will be searched.
+    Pass jobs through the parameter `job`. For multiple jobs, pass the param a few times.
+    limit param can also be passed to limit query results.
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
@@ -131,6 +167,12 @@ def get_loyal_crew_members():
 
 @app.route("/misc/genreDistribution")
 def get_genre_distribution():
+    """
+    Returns the distribution of genres for a given query.
+    If no query is given, all movies will be taken into account.
+    Query should be passed through `query` parameter, in BOOLEAN QUERY syntax, which is described here:
+    https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html
+    """
     conn = mysql.get_db()
     helper = mysql_common.MySQL(conn=conn)
 
