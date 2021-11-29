@@ -10,6 +10,7 @@ class Validator:
     crew_columns = None
     genres = None
     jobs = None
+    genders = None
     is_init = False
 
     @classmethod
@@ -32,6 +33,7 @@ class Validator:
                                                                'table_name': contract.CREW_VIEW})]
             cls.genres = [r[0] for r in mysql.query_all(contract.GENRES_TABLE, ['genre'])]
             cls.jobs = [r[0] for r in mysql.query_all(contract.JOBS_TABLE, ['job'])]
+            cls.genders = [r[0] for r in mysql.query_all(contract.GENDERS, ['gender'])]
         cls.is_init = True
 
     @classmethod
@@ -75,7 +77,15 @@ class Validator:
     @classmethod
     def find_invalid_jobs(cls, jobs: List[str]) -> List[str]:
         """
-        :param jobs: genres we want to query
-        :return: list of genres that are INVALID
+        :param jobs: jobs we want to query
+        :return: list of jobs that are INVALID
         """
-        return [genre for genre in jobs if genre not in cls.jobs]
+        return [job for job in jobs if job not in cls.jobs]
+
+    @classmethod
+    def find_invalid_genders(cls, genders: List[str]) -> List[str]:
+        """
+        :param genders: genders we want to query
+        :return: list of genders that are INVALID
+        """
+        return [gender for gender in genders if gender not in cls.jobs]

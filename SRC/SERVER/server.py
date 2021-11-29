@@ -43,7 +43,7 @@ def get_data(helper: mysql_common.MySQL, table: str, invalid_cols_func: Callable
     return jsonify(res)
 
 
-@app.route("/_query/movies")
+@app.route("/movies")
 def get_movies():
     """
     Query `movies` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
@@ -57,7 +57,7 @@ def get_movies():
     return get_data(helper, contract.MOVIES_VIEW, validator.find_invalid_movies_columns)
 
 
-@app.route("/_query/crew")
+@app.route("/crew")
 def get_crew():
     """
     Query `crew` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
@@ -71,7 +71,7 @@ def get_crew():
     return get_data(helper, contract.CREW_VIEW, validator.find_invalid_crew_columns)
 
 
-@app.route("/_query/cast")
+@app.route("/cast")
 def get_cast():
     """
     Query `cast` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
@@ -85,7 +85,7 @@ def get_cast():
     return get_data(helper, contract.CAST_VIEW, validator.find_invalid_cast_columns)
 
 
-@app.route("/lookalike/movies")
+@app.route("/movies/lookalike")
 def get_movie_lookalike():
     """
     Given a movie ID (passed through `id` parameter), return lookalike movies. Whether a movie is related,
@@ -108,6 +108,34 @@ def get_movie_lookalike():
         'lookalikes': [{k: v for (k, v) in movie.items() if k not in ['requested_movie', 'requested_movie_id']} for
                        movie in res]
     })
+
+
+@app.route('/cast/multiRole')
+def get_multi_role_actors():
+    """
+    Return actors that played multiple roles in a single movie.
+    Gender can be given and filtered by, in parameter `gender`, but is optional.
+    Limit can be given to limit amount of results, in parameter `limit`, but is optional
+    """
+    conn = mysql.get_db()
+    helper = mysql_common.MySQL(conn=conn)
+    validator = Validator.get(helper)
+
+    gender = request.args.get('gender')
+    limit = request.args.get('limit', DEFAULT_LIMIT)
+    if gender is not None:
+        if len(validator.find_invalid_genders([gender]) > 0):
+            return f"invalid gender given. must be: {', '.join(validator.genders)}", 400
+
+    gender_id = lookup.lookup_one(helper, contract.GENDERS, 'genre', gender, 'id') if gender is not None else None
+    res = helper.fetch_limit(
+        sql.get_multi_role_actors_query(gender_id),
+        (gender_id,) if gender_id is not None else None,
+        as_dict=True, limit=limit
+    )
+    for item in res:
+        item['characters'] = item['characters'].split(',')
+    return jsonify(res)
 
 
 @app.route("/misc/bestProfitPerWorker")

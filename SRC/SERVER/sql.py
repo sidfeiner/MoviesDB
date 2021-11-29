@@ -2,6 +2,24 @@ from typing import List, Optional
 
 from SRC.API_DATA_RETRIEVE import contract
 
+_MULTI_ROLE_ACTORS = """
+select n.name, t.title, group_concat(distinct cn.character_name) as characters
+from cast
+join names n on cast.name_id = n.id
+join movies m on cast.movie_id = m.id
+join character_names cn on cast.character_name_id = cn.id
+join titles t on m.original_title_id = t.id
+{where_clause}
+group by 1, 2
+having count(distinct cn.character_name) >= 2
+"""
+
+
+def get_multi_role_actors_query(with_gender: bool):
+    where_clause = 'where gender_id = %s' if with_gender else ''
+    return _MULTI_ROLE_ACTORS.format(where_clause=where_clause)
+
+
 LOOKALIKE_MOVIES = f"""
 with same_genres as
          (
