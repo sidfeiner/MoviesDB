@@ -1,6 +1,9 @@
+import json
 import os
+from decimal import Decimal
 from typing import List, Dict, Callable, Iterable
 
+import flask
 from flask import Flask, jsonify, request
 from flaskext.mysql import MySQL
 from werkzeug.datastructures import MultiDict
@@ -14,7 +17,16 @@ from SRC.SERVER.validation import Validator
 
 DEFAULT_LIMIT = 1000
 
+
+class AppEncoder(flask.json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
+
+
 app = Flask(__name__)
+app.json_encoder = AppEncoder
 
 app.config['MYSQL_DATABASE_USER'] = os.environ['MYSQL_USER']
 app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['MYSQL_PWD']
@@ -33,7 +45,7 @@ def as_dict_of_lists(d: MultiDict) -> Dict[str, List[str]]:
 
 def get_data(helper: mysql_common.MySQL, table: str, invalid_cols_func: Callable[[Iterable[str]], List[str]]):
     filters = as_dict_of_lists(request.args)
-    limit = filters.pop('limit') if 'limit' in filters else DEFAULT_LIMIT
+    limit = filters.pop('limit')[0] if 'limit' in filters else None
     projection = filters.pop('projection') if 'projection' in filters else None
     bad_filters = invalid_cols_func(filters.keys())
     bad_projections = invalid_cols_func(projection)
@@ -43,7 +55,7 @@ def get_data(helper: mysql_common.MySQL, table: str, invalid_cols_func: Callable
     return jsonify(res)
 
 
-@app.route("/movies")
+@app.route("/movies/")
 def get_movies():
     """
     Query `movies` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.

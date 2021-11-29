@@ -250,6 +250,7 @@ class Movie(ToDB):
     def override_target_names(cls) -> Dict[str, str]:
         return {
             'budget': 'budget_usd',
+            'adult': 'is_adult',
             'revenue': 'revenue_usd',
             'runtime': 'runtime_minutes',
             'vote_average': 'vote_avg',

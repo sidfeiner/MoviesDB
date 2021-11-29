@@ -30,7 +30,7 @@ create temporary table temp_movie_spoken_languages
 create temporary table temp_movies
 (
     id                int,
-    adult             bool,
+    is_adult             bool,
     budget_usd        int,
     original_language varchar(2),
     original_title    varchar(200),
@@ -49,11 +49,11 @@ create temporary table temp_movies
 """
 
 FINALIZE_MOVIES_TEMP_TABLES_QUERIES = """
-insert into movies.movies(id, adult, budget_usd, original_language, original_title_id, overview, popularity,
+insert into movies.movies(id, is_adult, budget_usd, original_language, original_title_id, overview, popularity,
                           release_date, revenue_usd, runtime_minutes, status_id, tagline, title_id, vote_avg,
                           vote_cnt)
 select m.id,
-       m.adult,
+       m.is_adult,
        m.budget_usd,
        m.original_language,
        ot.id,
