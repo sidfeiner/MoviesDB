@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import List, Dict, Callable, Iterable
 
 import flask
+from flasgger import Swagger
 from flask import Flask, jsonify, request
 from flaskext.mysql import MySQL
 from werkzeug.datastructures import MultiDict
@@ -27,6 +28,10 @@ class AppEncoder(flask.json.JSONEncoder):
 
 app = Flask(__name__)
 app.json_encoder = AppEncoder
+app.config['SWAGGER'] = {
+    'openapi': '3.0.0'
+}
+swagger = Swagger(app, template_file='docs/movie-db-service.yaml')
 
 app.config['MYSQL_DATABASE_USER'] = os.environ['MYSQL_USER']
 app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['MYSQL_PWD']
@@ -69,7 +74,7 @@ def get_movies():
     return get_data(helper, contract.MOVIES_VIEW, validator.find_invalid_movies_columns)
 
 
-@app.route("/crew")
+@app.route("/crew/")
 def get_crew():
     """
     Query `crew` table by any of it's columns. Parameters should be passed as <COLUMN_NAME>=<VALUE>.
@@ -217,6 +222,8 @@ def get_genre_distribution():
     helper = mysql_common.MySQL(conn=conn)
 
     match_query = request.args.get('query')
+    if match_query is None:
+        return "no match_query given", 400
 
     res = helper.fetch_limit(
         sql.get_genres_dist_by_bool_query(match_query is not None), [match_query] if match_query is not None else None,

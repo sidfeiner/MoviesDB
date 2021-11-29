@@ -1,0 +1,909 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: sidfeiner@gmail.com
+  description: API specs for movies service
+  title: movie-db-service
+  version: '1.0'
+servers:
+  - url: 'http://localhost:5050'
+paths:
+  /cast:
+    get:
+      summary: getCast
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - character_name: string
+                      gender: string
+                      id: 0
+                      movie_title: string
+                      name: string
+                      order: 0
+                items:
+                  type: object
+                  properties:
+                    character_name:
+                      type: string
+                      minLength: 1
+                    gender:
+                      type: string
+                      minLength: 1
+                    id:
+                      type: number
+                    movie_title:
+                      type: string
+                      minLength: 1
+                    name:
+                      type: string
+                      minLength: 1
+                    order:
+                      type: number
+              examples:
+                example-1:
+                  value:
+                    - character_name: string
+                      gender: string
+                      id: 0
+                      movie_title: string
+                      name: string
+                      order: 0
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    following columns are not supported: 'XXX,YYY'
+      operationId: get-cast
+      description: |-
+        Query `cast` table by any of it's columns.
+        You can also pass `projection` parameters to return specific columns. If no projection parameter is passed, all columns will be returned.
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: id
+          description: id of cast member
+        - schema:
+            type: string
+          in: query
+          name: name
+          description: name of cast member
+        - schema:
+            type: string
+          in: query
+          name: character_name
+          description: character name of cast member in this movie
+        - schema:
+            type: string
+          in: query
+          name: gender
+          description: gender of cast member
+        - schema:
+            type: integer
+          in: query
+          name: order
+          description: order in the credits of cast member for this specific movie
+        - schema:
+            type: string
+          in: query
+          name: movie_title
+          description: title of movie this member was cast in
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+  /movies:
+    get:
+      summary: getMovies
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - adult: 1
+                      budget_usd: 50000
+                      id: 2
+                      original_language: fi
+                      original_title: Ariel
+                      overview: 'Taisto Kasurinen is a Finnish coal miner whose father has just committed suicide and who is framed for a crime he did not commit. In jail, he starts to dream about leaving the country and starting a new life. He escapes from prison but things don''t go as planned...'
+                      popularity: 3.86
+                      release_date: 'Fri, 21 Oct 1988 00:00:00 GMT'
+                      revenue_usd: 5555555
+                      runtime_minutes: 69
+                      status: Released
+                      tagline: heyy
+                      title: Ariel
+                      vote_avg: 7.1
+                      vote_cnt: 44
+                items:
+                  type: object
+                  properties:
+                    adult:
+                      type: number
+                    budget_usd:
+                      type: number
+                    id:
+                      type: number
+                    original_language:
+                      type: string
+                      minLength: 1
+                    original_title:
+                      type: string
+                      minLength: 1
+                    overview:
+                      type: string
+                      minLength: 1
+                    popularity:
+                      type: number
+                    release_date:
+                      type: string
+                      minLength: 1
+                    revenue_usd:
+                      type: number
+                    runtime_minutes:
+                      type: number
+                    status:
+                      type: string
+                      minLength: 1
+                    tagline:
+                      type: string
+                      minLength: 1
+                    title:
+                      type: string
+                      minLength: 1
+                    vote_avg:
+                      type: number
+                    vote_cnt:
+                      type: number
+              examples:
+                example-1:
+                  value:
+                    - adult: 1
+                      budget_usd: 50000
+                      id: 2
+                      original_language: fi
+                      original_title: Ariel
+                      overview: 'Taisto Kasurinen is a Finnish coal miner whose father has just committed suicide and who is framed for a crime he did not commit. In jail, he starts to dream about leaving the country and starting a new life. He escapes from prison but things don''t go as planned...'
+                      popularity: 3.86
+                      release_date: 'Fri, 21 Oct 1988 00:00:00 GMT'
+                      revenue_usd: 5555555
+                      runtime_minutes: 69
+                      status: Released
+                      tagline: heyy
+                      title: Ariel
+                      vote_avg: 7.1
+                      vote_cnt: 44
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: 'following columns are not supported: XXX,YYY'
+      operationId: get-movies
+      description: |-
+        Query `movies` table by any of it's columns.
+        You can also pass `projection` parameters to return specific columns. If no projection parameter is passed, all columns will be returned.
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: id
+        - schema:
+            type: string
+          in: query
+          name: title
+        - schema:
+            type: string
+          in: query
+          name: original_language
+        - schema:
+            type: number
+          in: query
+          name: popularity
+        - schema:
+            type: string
+          in: query
+          name: release_date
+          description: Formatted as yyyy-mm-dd
+        - schema:
+            type: string
+          in: query
+          name: tagline
+        - schema:
+            type: string
+          in: query
+          name: overview
+        - schema:
+            type: boolean
+          in: query
+          name: is_adult
+        - schema:
+            type: integer
+          in: query
+          name: budget_usd
+        - schema:
+            type: integer
+          in: query
+          name: revenue_usd
+        - schema:
+            type: integer
+          in: query
+          name: runtime_minutes
+        - schema:
+            type: string
+          in: query
+          name: status
+        - schema:
+            type: number
+          in: query
+          name: vote_avg
+          description: On a scale of 0-10
+        - schema:
+            type: integer
+          in: query
+          name: vote_cnt
+        - schema:
+            type: string
+          in: query
+          name: projection
+          description: 'array of columns that we want the API to return. Can be an array containing any of the above columns. If no projection is given, all columns will be returned'
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+    parameters: []
+  /crew:
+    get:
+      summary: getCrew
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - department: Directing
+                      gender: male
+                      id: 1
+                      job: Director
+                      movie_title: Toy Story
+                      name: John Lasseter
+                items:
+                  type: object
+                  properties:
+                    department:
+                      type: string
+                      minLength: 1
+                    gender:
+                      type: string
+                      minLength: 1
+                    id:
+                      type: number
+                    job:
+                      type: string
+                      minLength: 1
+                    movie_title:
+                      type: string
+                      minLength: 1
+                    name:
+                      type: string
+                      minLength: 1
+              examples:
+                example-1:
+                  value:
+                    - department: Directing
+                      gender: male
+                      id: 1
+                      job: Director
+                      movie_title: Toy Story
+                      name: John Lasseter
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: 'following columns are not supported: XXX,YYY'
+      operationId: get-crew
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: id
+          description: ID of crew member
+        - schema:
+            type: string
+          in: query
+          name: name
+          description: name of crew member
+        - schema:
+            type: string
+          in: query
+          name: gender
+          description: gender of crew member
+        - schema:
+            type: string
+          in: query
+          name: job
+          description: job of crew member
+        - schema:
+            type: string
+          in: query
+          name: department
+          description: department of crew member
+        - schema:
+            type: string
+          in: query
+          name: movie_title
+          description: movie this info is related to
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+      description: |-
+        Query `crew` table by any of it's columns.
+        You can also pass `projection` parameters to return specific columns. If no projection parameter is passed, all columns will be returned.
+  /movies/lookalike:
+    get:
+      summary: getMovieLookalike
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: object
+                  required:
+                    - lookalike_score
+                    - movie_id
+                    - mutual_cast_amt
+                    - mutual_crew_amt
+                    - mutual_genres_amt
+                    - original_language
+                    - title
+                    - vote_avg
+                  properties:
+                    lookalike_score:
+                      type: number
+                    movie_id:
+                      type: number
+                    mutual_cast_amt:
+                      type: number
+                    mutual_crew_amt:
+                      type: number
+                    mutual_genres_amt:
+                      type: number
+                    original_language:
+                      type: string
+                      minLength: 1
+                    title:
+                      type: string
+                      minLength: 1
+                    vote_avg:
+                      type: number
+                x-examples:
+                  example-1:
+                    - lookalike_score: 24
+                      movie_id: 776
+                      mutual_cast_amt: 3
+                      mutual_crew_amt: 10
+                      mutual_genres_amt: 1
+                      original_language: fr
+                      title: The Rules of the Game
+                      vote_avg: 7.7
+              examples:
+                example-1:
+                  value:
+                    - lookalike_score: 24
+                      movie_id: 776
+                      mutual_cast_amt: 3
+                      mutual_crew_amt: 10
+                      mutual_genres_amt: 1
+                      original_language: fr
+                      title: The Rules of the Game
+                      vote_avg: 7.7
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: No lookalike was found
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: id of movie was not given
+      operationId: get-movies-lookalike
+      description: 'Given a movie ID, return lookalike movies. Whether a movie is related, is based on the genre, the mutual crew/cast members and results are sorted by popularity.'
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: id
+          description: Movie ID
+          required: true
+        - schema:
+            type: string
+          in: query
+          description: 'If given, will limit the amount of returned records'
+          name: limit
+  /cast/multiRole:
+    get:
+      summary: getCastMultiRole
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: object
+                  required:
+                    - characters
+                    - name
+                    - title
+                  properties:
+                    characters:
+                      type: array
+                      items:
+                        properties: {}
+                    name:
+                      type: string
+                      minLength: 1
+                    title:
+                      type: string
+                      minLength: 1
+                x-examples:
+                  example-1:
+                    - characters:
+                        - Anttila
+                        - Kari Haapanen
+                      name: Aarno Sulkanen
+                      title: Syksyllä kaikki on toisin
+                    - characters:
+                        - Bush
+                        - Luigi
+                      name: Adam Clark
+                      title: Killer Cop
+              examples:
+                example-1:
+                  value:
+                    - characters:
+                        - Anttila
+                        - Kari Haapanen
+                      name: Aarno Sulkanen
+                      title: Syksyllä kaikki on toisin
+                    - characters:
+                        - Bush
+                        - Luigi
+                      name: Adam Clark
+                      title: Killer Cop
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties: {}
+              examples: {}
+      operationId: get-cast-multiRole
+      description: |-
+        Return actors that played multiple roles in a single movie.
+        Gender can be given and filtered by, but is optional.
+        Limit can be given to limit amount of results, but is optional
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - male
+              - female
+          in: query
+          name: gender
+        - schema:
+            type: string
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+  /misc/bestProfitPerWorker:
+    get:
+      summary: getBestProfitPerWorker
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - movie_id: 11
+                      movie_name: Star Wars
+                      profit_rate: 6265557.4344
+                    - movie_id: 18
+                      movie_name: The Fifth Element
+                      profit_rate: 718678.4298
+                    - movie_id: 22
+                      movie_name: 'Pirates of the Caribbean: The Curse of the Black Pearl'
+                      profit_rate: 2288938.7733
+                    - movie_id: 24
+                      movie_name: 'Kill Bill: Vol. 1'
+                      profit_rate: 794468.4211
+                items:
+                  type: object
+                  properties:
+                    movie_id:
+                      type: number
+                    movie_name:
+                      type: string
+                      minLength: 1
+                    profit_rate:
+                      type: number
+                      description: Amount of dollars per crew member
+                  required:
+                    - movie_id
+                    - movie_name
+                    - profit_rate
+              examples:
+                example-1:
+                  value:
+                    - movie_id: 11
+                      movie_name: Star Wars
+                      profit_rate: 6265557.4344
+                    - movie_id: 18
+                      movie_name: The Fifth Element
+                      profit_rate: 718678.4298
+                    - movie_id: 22
+                      movie_name: 'Pirates of the Caribbean: The Curse of the Black Pearl'
+                      profit_rate: 2288938.7733
+                    - movie_id: 24
+                      movie_name: 'Kill Bill: Vol. 1'
+                      profit_rate: 794468.4211
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: invalid genre given
+      operationId: get-misc-bestProfitPerWorker
+      description: |
+        For a given genre, return the movie with the best profit per worker.
+        This is calculated by dividing the net revenue (gross - budget) between all workers (cast + crew), meaning the result is movies where every worker had in the average, the biggest contribution to the movie's financial success.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: genre
+          required: true
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+  /misc/loyalCrewMembers:
+    get:
+      summary: getLoyalCrewMembers
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - jobs:
+                        - Director
+                      name: 300ml
+                      production_company: Ananã Produções
+                    - jobs:
+                        - Director
+                      name: A.E. Weed
+                      production_company: American Mutoscope & Biograph
+                    - jobs:
+                        - Director
+                      name: A.V. Bramble
+                      production_company: British Instructional Films (BIF)
+                    - jobs:
+                        - Director
+                        - Writer
+                      name: A.W. Vidmer
+                      production_company: AMV Production
+                    - jobs:
+                        - Director
+                      name: Aaron Biebert
+                      production_company: Attention Era Media
+                    - jobs:
+                        - Director
+                      name: Aaron Blaise
+                      production_company: Walt Disney Feature Animation
+                    - jobs:
+                        - Director
+                        - Editor
+                        - Writer
+                      name: Aaron Fronk
+                      production_company: FND Films
+                    - jobs:
+                        - Director
+                        - Producer
+                        - Writer
+                      name: Aaron Keeling
+                      production_company: E3W Productions
+                    - jobs:
+                        - Director
+                      name: Aaron Leong
+                      production_company: My Hero Productions
+                    - jobs:
+                        - Director
+                      name: Aaron T. Wells
+                      production_company: Spy Global Media
+                    - jobs:
+                        - Director
+                        - Writer
+                      name: Abbas Fahdel
+                      production_company: ADR Productions
+                    - jobs:
+                        - Assistant Director
+                      name: Abby Berlin
+                      production_company: Columbia Pictures Corporation
+                    - jobs:
+                        - Director
+                        - Writer
+                      name: Abe Sylvia
+                      production_company: iDeal Partners Film Fund
+                    - jobs:
+                        - Dialogue
+                      name: Abhinav Kashyap
+                      production_company: Reliance Big Pictures
+                    - jobs:
+                        - Director
+                      name: Abhinay Deo
+                      production_company: UTV Motion Pictures
+                    - jobs:
+                        - Director
+                        - Writer
+                items:
+                  type: object
+                  properties:
+                    jobs:
+                      type: array
+                      description: All jobs this person has done for the company
+                      items:
+                        type: string
+                    name:
+                      type: string
+                      minLength: 1
+                    production_company:
+                      type: string
+                      minLength: 1
+                  required:
+                    - jobs
+                    - name
+                    - production_company
+              examples:
+                example-1:
+                  value:
+                    - jobs:
+                        - Director
+                      name: A.E. Weed
+                      production_company: American Mutoscope & Biograph
+                    - jobs:
+                        - Director
+                      name: A.V. Bramble
+                      production_company: British Instructional Films (BIF)
+                    - jobs:
+                        - Director
+                        - Writer
+                      name: A.W. Vidmer
+                      production_company: AMV Production
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: invalid job given
+      operationId: get-misc-loyalCrewMembers
+      description: |-
+        Returns crew members that are local to their production company, meaning they work ONLY with a single production company.
+        API returns data for a specific job (or jobs). If no job is given, all jobs will be searched.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: job
+          description: array of strings
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
+  /misc/genreDistribution:
+    get:
+      summary: getGenreDistribution
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                items:
+                  type: object
+                  required:
+                    - genre
+                    - pct
+                  properties:
+                    genre:
+                      type: string
+                      minLength: 1
+                    pct:
+                      type: number
+                x-examples:
+                  example-1:
+                    - genre: Comedy
+                      pct: 17.39
+                    - genre: Horror
+                      pct: 16.52
+                    - genre: Animation
+                      pct: 12.17
+                    - genre: Family
+                      pct: 11.3
+                    - genre: Thriller
+                      pct: 6.96
+                    - genre: Fantasy
+                      pct: 5.22
+                    - genre: Drama
+                      pct: 5.22
+                    - genre: Action
+                      pct: 4.35
+                    - genre: Mystery
+                      pct: 4.35
+                    - genre: Adventure
+                      pct: 3.48
+                    - genre: Romance
+                      pct: 3.48
+                    - genre: Documentary
+                      pct: 2.61
+                    - genre: Science Fiction
+                      pct: 2.61
+                    - genre: Crime
+                      pct: 1.74
+                    - genre: Music
+                      pct: 0.87
+                    - genre: Foreign
+                      pct: 0.87
+                    - genre: TV Movie
+                      pct: 0.87
+              examples:
+                example-1:
+                  value:
+                    - genre: Comedy
+                      pct: 17.39
+                    - genre: Horror
+                      pct: 16.52
+                    - genre: Animation
+                      pct: 12.17
+                    - genre: Family
+                      pct: 11.3
+                    - genre: Thriller
+                      pct: 6.96
+                    - genre: Fantasy
+                      pct: 5.22
+                    - genre: Drama
+                      pct: 5.22
+                    - genre: Action
+                      pct: 4.35
+                    - genre: Mystery
+                      pct: 4.35
+                    - genre: Adventure
+                      pct: 3.48
+                    - genre: Romance
+                      pct: 3.48
+                    - genre: Documentary
+                      pct: 2.61
+                    - genre: Science Fiction
+                      pct: 2.61
+                    - genre: Crime
+                      pct: 1.74
+                    - genre: Music
+                      pct: 0.87
+                    - genre: Foreign
+                      pct: 0.87
+                    - genre: TV Movie
+                      pct: 0.87
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                example-1:
+                  value: no match_query given
+      operationId: get-misc-genreDistribution
+      description: |-
+        Returns the distribution of genres for a given query.
+        If no query is given, all movies will be taken into account.
+        Query should be passed through `query` parameter, in BOOLEAN QUERY syntax, which is described here:
+        https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: query
+          description: BOOLEAN query syntax
+components:
+  schemas: {}
