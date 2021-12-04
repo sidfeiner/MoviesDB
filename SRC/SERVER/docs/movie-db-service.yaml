@@ -8,107 +8,6 @@ info:
 servers:
   - url: 'http://localhost:5050'
 paths:
-  /cast:
-    get:
-      summary: getCast
-      tags: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                description: ''
-                minItems: 1
-                uniqueItems: true
-                x-examples:
-                  example-1:
-                    - character_name: string
-                      gender: string
-                      id: 0
-                      movie_title: string
-                      name: string
-                      order: 0
-                items:
-                  type: object
-                  properties:
-                    character_name:
-                      type: string
-                      minLength: 1
-                    gender:
-                      type: string
-                      minLength: 1
-                    id:
-                      type: number
-                    movie_title:
-                      type: string
-                      minLength: 1
-                    name:
-                      type: string
-                      minLength: 1
-                    order:
-                      type: number
-              examples:
-                example-1:
-                  value:
-                    - character_name: string
-                      gender: string
-                      id: 0
-                      movie_title: string
-                      name: string
-                      order: 0
-        '400':
-          description: Bad Request
-          content:
-            text/plain:
-              schema:
-                type: object
-                properties: {}
-              examples:
-                example-1:
-                  value:
-                    following columns are not supported: 'XXX,YYY'
-      operationId: get-cast
-      description: |-
-        Query `cast` table by any of it's columns.
-        You can also pass `projection` parameters to return specific columns. If no projection parameter is passed, all columns will be returned.
-      parameters:
-        - schema:
-            type: integer
-          in: query
-          name: id
-          description: id of cast member
-        - schema:
-            type: string
-          in: query
-          name: name
-          description: name of cast member
-        - schema:
-            type: string
-          in: query
-          name: character_name
-          description: character name of cast member in this movie
-        - schema:
-            type: string
-          in: query
-          name: gender
-          description: gender of cast member
-        - schema:
-            type: integer
-          in: query
-          name: order
-          description: order in the credits of cast member for this specific movie
-        - schema:
-            type: string
-          in: query
-          name: movie_title
-          description: title of movie this member was cast in
-        - schema:
-            type: integer
-          in: query
-          name: limit
-          description: 'If given, will limit the amount of returned records'
   /movies:
     get:
       summary: getMovies
@@ -281,6 +180,107 @@ paths:
           name: limit
           description: 'If given, will limit the amount of returned records'
     parameters: []
+  /cast:
+    get:
+      summary: getCast
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: ''
+                minItems: 1
+                uniqueItems: true
+                x-examples:
+                  example-1:
+                    - character_name: string
+                      gender: string
+                      id: 0
+                      movie_title: string
+                      name: string
+                      order: 0
+                items:
+                  type: object
+                  properties:
+                    character_name:
+                      type: string
+                      minLength: 1
+                    gender:
+                      type: string
+                      minLength: 1
+                    id:
+                      type: number
+                    movie_title:
+                      type: string
+                      minLength: 1
+                    name:
+                      type: string
+                      minLength: 1
+                    order:
+                      type: number
+              examples:
+                example-1:
+                  value:
+                    - character_name: string
+                      gender: string
+                      id: 0
+                      movie_title: string
+                      name: string
+                      order: 0
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    following columns are not supported: 'XXX,YYY'
+      operationId: get-cast
+      description: |-
+        Query `cast` table by any of it's columns.
+        You can also pass `projection` parameters to return specific columns. If no projection parameter is passed, all columns will be returned.
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: id
+          description: id of cast member
+        - schema:
+            type: string
+          in: query
+          name: name
+          description: name of cast member
+        - schema:
+            type: string
+          in: query
+          name: character_name
+          description: character name of cast member in this movie
+        - schema:
+            type: string
+          in: query
+          name: gender
+          description: gender of cast member
+        - schema:
+            type: integer
+          in: query
+          name: order
+          description: order in the credits of cast member for this specific movie
+        - schema:
+            type: string
+          in: query
+          name: movie_title
+          description: title of movie this member was cast in
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: 'If given, will limit the amount of returned records'
   /crew:
     get:
       summary: getCrew
@@ -905,5 +905,406 @@ paths:
           in: query
           name: query
           description: BOOLEAN query syntax
+  /misc/keywordsGenreStats:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  Action:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - genre
+                        - keyword
+                        - movies_in_genre_pct
+                      properties:
+                        genre:
+                          type: string
+                          minLength: 1
+                        keyword:
+                          type: string
+                          minLength: 1
+                        movies_descr_stats:
+                          type: object
+                          properties:
+                            in_overview_pct:
+                              type: number
+                            in_tagline_pct:
+                              type: number
+                          required:
+                            - in_overview_pct
+                            - in_tagline_pct
+                        movies_in_genre_pct:
+                          type: number
+                  Comedy:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - genre
+                        - keyword
+                        - movies_in_genre_pct
+                      properties:
+                        genre:
+                          type: string
+                          minLength: 1
+                        keyword:
+                          type: string
+                          minLength: 1
+                        movies_descr_stats:
+                          type: object
+                          properties:
+                            in_overview_pct:
+                              type: number
+                            in_tagline_pct:
+                              type: number
+                          required:
+                            - in_overview_pct
+                            - in_tagline_pct
+                        movies_in_genre_pct:
+                          type: number
+                required:
+                  - Action
+                  - Comedy
+                x-examples:
+                  example-1:
+                    Action:
+                      - genre: Action
+                        keyword: martial arts
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 4.38
+                      - genre: Action
+                        keyword: revenge
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 3.61
+                      - genre: Action
+                        keyword: murder
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 3.19
+                      - genre: Action
+                        keyword: violence
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 3.14
+                      - genre: Action
+                        keyword: independent film
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.67
+                      - genre: Action
+                        keyword: sequel
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.44
+                      - genre: Action
+                        keyword: police
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.43
+                      - genre: Action
+                        keyword: superhero
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.23
+                      - genre: Action
+                        keyword: dystopia
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.11
+                      - genre: Action
+                        keyword: based on comic
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.68
+                      - genre: Action
+                        keyword: gangster
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.64
+                      - genre: Action
+                        keyword: suspense
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.64
+                      - genre: Action
+                        keyword: duringcreditsstinger
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.61
+                      - genre: Action
+                        keyword: woman director
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.56
+                      - genre: Action
+                        keyword: kidnapping
+                        movies_descr_stats:
+                          in_overview_pct: 0.11
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.47
+                      - genre: Action
+                        keyword: assassin
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.47
+                      - genre: Action
+                        keyword: world war ii
+                        movies_descr_stats:
+                          in_overview_pct: 0.05
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.4
+                      - genre: Action
+                        keyword: based on novel
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.37
+                      - genre: Action
+                        keyword: spy
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.35
+                      - genre: Action
+                        keyword: prison
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.27
+                      - genre: Action
+                        keyword: monster
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.18
+                      - genre: Action
+                        keyword: kung fu
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.18
+                      - genre: Action
+                        keyword: female nudity
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.18
+                      - genre: Action
+                        keyword: nudity
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.17
+                    Comedy:
+                      - genre: Comedy
+                        keyword: woman director
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 6.03
+                      - genre: Comedy
+                        keyword: independent film
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 5.62
+                      - genre: Comedy
+                        keyword: musical
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.85
+                      - genre: Comedy
+                        keyword: stand-up comedy
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.61
+                      - genre: Comedy
+                        keyword: duringcreditsstinger
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 2.02
+                      - genre: Comedy
+                        keyword: sex
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.93
+                      - genre: Comedy
+                        keyword: love
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.64
+                      - genre: Comedy
+                        keyword: sport
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.63
+                      - genre: Comedy
+                        keyword: teenager
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.43
+                      - genre: Comedy
+                        keyword: friendship
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.34
+                      - genre: Comedy
+                        keyword: murder
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.33
+                      - genre: Comedy
+                        keyword: female nudity
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.31
+                      - genre: Comedy
+                        keyword: nudity
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.27
+                      - genre: Comedy
+                        keyword: high school
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.25
+                      - genre: Comedy
+                        keyword: wedding
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.22
+                      - genre: Comedy
+                        keyword: based on novel
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.2
+                      - genre: Comedy
+                        keyword: dark comedy
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.06
+                      - genre: Comedy
+                        keyword: comedy
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 1.05
+                      - genre: Comedy
+                        keyword: police
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 0.93
+                      - genre: Comedy
+                        keyword: holiday
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 0.93
+                      - genre: Comedy
+                        keyword: aftercreditsstinger
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 0.91
+              examples:
+                example-1:
+                  value:
+                    Action:
+                      - genre: Action
+                        keyword: martial arts
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 4.38
+                      - genre: Action
+                        keyword: revenge
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 3.61
+                    Comedy:
+                      - genre: Comedy
+                        keyword: woman director
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 6.03
+                      - genre: Comedy
+                        keyword: independent film
+                        movies_descr_stats:
+                          in_overview_pct: 0
+                          in_tagline_pct: 0
+                        movies_in_genre_pct: 5.62
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    invalid genres given: AAction
+      operationId: get-misc-keywordsGenreStats
+      description: |-
+        Given genres, returns the most common keywords for these genres, with extra data regarding in how many movies of this genre (in percentage), the keyword appears in it's description (either tagline or overview).
+        More than `limit` keywords can be returned per genre, if some of these keywords have the same weight in the genre.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: genre
+          description: Genres to query. Multiple values can be given
+        - schema:
+            type: string
+          in: query
+          name: limit
+          description: 'Return the keywords whose rank is at most this limit. If not given, default is 20'
 components:
   schemas: {}

@@ -140,8 +140,9 @@ def get_genres_dist_by_bool_query(with_match: bool):
     return _genres_dist_by_bool_query.format(match_clause=match_clause)
 
 
-GENRE_KEYWORDS_STATS_QUERY = """
-select k.keyword,
+_GENRE_KEYWORDS_STATS_QUERY = """
+select g.genre, 
+       k.keyword,
        movies_in_genre_pct,
        in_tagline_pct,
        in_overview_pct
@@ -153,10 +154,17 @@ from (
                 in_overview_pct,
                 dense_rank() over (partition by genre_id order by movies_in_genre_pct desc) as rnk
          from keywords_genre_stats
-         where genre_id = %(genre_id)s
+         {where_clause}
      ) a
          join genres g on g.id = a.genre_id
          join keywords k on k.id = a.keyword_id
-where rnk <= %(limit_per_genre)s
-order by a.rnk asc
+where rnk <= %s
+order by g.genre, a.rnk asc
 """
+
+
+def genres_keywords_stats_query(genres_amt: int):
+    clause = ''
+    if genres_amt > 0:
+        clause = f"where genre_id in ({', '.join(['%s'] * genres_amt)})"
+    return _GENRE_KEYWORDS_STATS_QUERY.format(where_clause=clause)

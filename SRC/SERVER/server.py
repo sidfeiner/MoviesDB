@@ -246,26 +246,32 @@ def get_keywords_genre_stats():
     helper = mysql_common.MySQL(conn=conn)
     validator = Validator.get(helper)
 
-    genre = request.args.get('genre')
-    if genre is None:
-        return "no genre given", 400
-    if len(validator.find_invalid_genres([genre])) > 0:
-        return f"invalid genre given", 400
+    args_lists = as_dict_of_lists(request.args)
+    genres = args_lists['genre']
+    bad_genres = validator.find_invalid_genres(genres)
+    if len(bad_genres) > 0:
+        return f"invalid genres given: {', '.join(bad_genres)}", 400
 
-    genre_id = lookup.lookup_one(helper, contract.GENRES_TABLE, 'genre', genre, 'id')
+    genre_ids = lookup.lookup_many(helper, contract.GENRES_TABLE, 'genre', genres, 'id')
     limit_per_genre = request.args.get('limit_per_genre') or DEFAULT_LIMIT_PER_GENRE
+    query = sql.genres_keywords_stats_query(len(genres))
     res = helper.fetch_all(
-        sql.GENRE_KEYWORDS_STATS_QUERY,
-        {'limit_per_genre': limit_per_genre, 'genre_id': genre_id},
+        query,
+        tuple(list(genre_ids.values()) + [limit_per_genre]),
         as_dict=True
     )
+
+    res_dict = {}
     for item in res:
         item['movies_descr_stats'] = {
             'in_overview_pct': item.pop('in_overview_pct'),
             'in_tagline_pct': item.pop('in_tagline_pct')
         }
+        if item['genre'] not in res_dict:
+            res_dict[item['genre']] = []
+        res_dict[item['genre']].append(item)
 
-    return jsonify(res)
+    return jsonify(res_dict)
 
 
 if __name__ == '__main__':
