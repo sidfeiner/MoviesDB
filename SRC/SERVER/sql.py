@@ -138,3 +138,25 @@ order by pct desc
 def get_genres_dist_by_bool_query(with_match: bool):
     match_clause = f"where MATCH(overview, tagline) AGAINST(%s IN BOOLEAN MODE)" if with_match else ''
     return _genres_dist_by_bool_query.format(match_clause=match_clause)
+
+
+GENRE_KEYWORDS_STATS_QUERY = """
+select k.keyword,
+       movies_in_genre_pct,
+       in_tagline_pct,
+       in_overview_pct
+from (
+         select genre_id,
+                keyword_id,
+                movies_in_genre_pct,
+                in_tagline_pct,
+                in_overview_pct,
+                dense_rank() over (partition by genre_id order by movies_in_genre_pct desc) as rnk
+         from keywords_genre_stats
+         where genre_id = %(genre_id)s
+     ) a
+         join genres g on g.id = a.genre_id
+         join keywords k on k.id = a.keyword_id
+where rnk <= %(limit_per_genre)s
+order by a.rnk asc
+"""

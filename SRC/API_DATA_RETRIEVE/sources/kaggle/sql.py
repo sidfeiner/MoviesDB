@@ -124,18 +124,33 @@ create temporary table temp_crew
 """
 
 FINALIZE_CREDITS_TEMP_TABLES_QUERIES = """
+insert into movies.persons(name_id, gender_id) 
+select n.id as name_id, max(m.gender_id)
+from temp_cast m
+        left join movies.names n using (name)
+group by 1
+on duplicate key update name_id=name_id;
 
-insert into movies.cast(name_id, character_name_id, gender_id, `order`, cast_id, movie_id, id_in_cast)
-select n.id, cn.id, m.gender_id, m.`order`, m.cast_id, m.movie_id, m.id_in_cast
+insert into movies.persons(name_id, gender_id) 
+select n.id as name_id, max(m.gender_id)
+from temp_crew m
+        left join movies.names n using (name)
+group by 1
+on duplicate key update name_id=name_id;
+
+insert into movies.cast(person_id, character_name_id, `order`, cast_id, movie_id, id_in_cast)
+select p.id, cn.id, m.`order`, m.cast_id, m.movie_id, m.id_in_cast
 from temp_cast m
          left join movies.names n using (name)
+         left join movies.persons p on n.id = p.name_id
          left join movies.character_names cn using (character_name)
 on duplicate key update movie_id=m.movie_id;
 
-insert into movies.crew(name_id, gender_id, job_id, department_id, movie_id, id_in_crew)
-select n.id, m.gender_id, j.id, d.id, m.movie_id, m.id_in_crew
+insert into movies.crew(person_id, job_id, department_id, movie_id, id_in_crew)
+select p.id, j.id, d.id, m.movie_id, m.id_in_crew
 from temp_crew m
          left join movies.names n using (name)
+         left join movies.persons p on n.id = p.name_id
          left join movies.jobs j using (job)
          left join movies.departments d using (department)
 on duplicate key update movie_id=m.movie_id;

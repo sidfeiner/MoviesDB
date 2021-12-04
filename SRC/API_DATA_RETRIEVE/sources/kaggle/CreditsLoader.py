@@ -13,11 +13,12 @@ DEFAULT_INSERT_BATCH_SIZE = 1000
 
 
 class CreditsLoader:
-    def __init__(self, mysql_usr: str, mysql_pwd: str, mysql_host: Optional[str] = None,
-                 mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, log_level: str = logging.INFO):
+    def __init__(self, mysql_usr: str = '', mysql_pwd: str = '', mysql_host: Optional[str] = None,
+                 mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, mysql_helper: Optional[MySQL] = None,
+                 log_level: str = logging.INFO):
         logging.basicConfig(level=log_level,
                             format="%(asctime)s : %(threadName)s: %(levelname)s : %(name)s : %(module)s : %(message)s")
-        self.mysql_auth = MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db)
+        self.mysql = mysql_helper or MySQL(MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db))
 
     @staticmethod
     def get_ingestion_ddl() -> List[str]:
@@ -27,7 +28,7 @@ class CreditsLoader:
     def get_parsed_credits_generator(credits_file_path: str) -> Generator[Credits, None, None]:
         with open(credits_file_path, newline='') as fp:
             reader = csv.DictReader(fp, delimiter=',', quotechar='"')
-            for row in reader:
+            for _, row in enumerate(reader):
                 crew = []
                 for member in ast.literal_eval(row['crew']):
                     member['movie_id'] = int(row['id'])
@@ -44,7 +45,7 @@ class CreditsLoader:
 
     def load(self, credits_file_path: str, insert_batch_size: int = DEFAULT_INSERT_BATCH_SIZE):
         credits = self.get_parsed_credits_generator(credits_file_path)
-        with MySQL(self.mysql_auth) as mysql:
+        with self.mysql as mysql:
             crsr = mysql.get_cursor()
             departments_inserter = BatchValueInserter(mysql, crsr, insert_batch_size, contract.DEPARTMENT_TABLE,
                                                       contract.DEPARTMENT_COLUMN)

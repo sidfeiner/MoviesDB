@@ -233,5 +233,40 @@ def get_genre_distribution():
     return jsonify(res)
 
 
+DEFAULT_LIMIT_PER_GENRE = 20
+
+
+@app.route("/misc/keywordsGenreStats")
+def get_keywords_genre_stats():
+    """
+    Given a genre_id, returns the most common keywords for this genre, with extra data regarding
+    in how many movies of this genre (in percentage), the keyword appears in it's description (either tagline or overview)
+    """
+    conn = mysql.get_db()
+    helper = mysql_common.MySQL(conn=conn)
+    validator = Validator.get(helper)
+
+    genre = request.args.get('genre')
+    if genre is None:
+        return "no genre given", 400
+    if len(validator.find_invalid_genres([genre])) > 0:
+        return f"invalid genre given", 400
+
+    genre_id = lookup.lookup_one(helper, contract.GENRES_TABLE, 'genre', genre, 'id')
+    limit_per_genre = request.args.get('limit_per_genre') or DEFAULT_LIMIT_PER_GENRE
+    res = helper.fetch_all(
+        sql.GENRE_KEYWORDS_STATS_QUERY,
+        {'limit_per_genre': limit_per_genre, 'genre_id': genre_id},
+        as_dict=True
+    )
+    for item in res:
+        item['movies_descr_stats'] = {
+            'in_overview_pct': item.pop('in_overview_pct'),
+            'in_tagline_pct': item.pop('in_tagline_pct')
+        }
+
+    return jsonify(res)
+
+
 if __name__ == '__main__':
     app.run(port=5050)

@@ -2,7 +2,7 @@ from typing import Optional
 
 import fire
 
-from SRC.API_DATA_RETRIEVE.common.mysql import MySQLAuth
+from SRC.API_DATA_RETRIEVE.common.mysql import MySQLAuth, MySQL
 import logging
 
 from SRC.API_DATA_RETRIEVE.contract import DEFAULT_DB
@@ -29,16 +29,19 @@ class KaggleLoader:
                  mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, log_level: str = logging.INFO):
         logging.basicConfig(level=log_level,
                             format="%(asctime)s : %(threadName)s: %(levelname)s : %(name)s : %(module)s : %(message)s")
-        self.mysql_auth = MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db)
+        self.mysql = MySQL(MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db))
+
+    def apply_etls(self):
+        with self.mysql as mysql:
+            crsr = mysql.get_cursor()
+            logging.info("running PrepareMatchingKeywords procedure...")
+            mysql.execute("CALL PrepareMatchingKeywords()", crsr)
 
     def load(self, movies_file_path: str, credits_file_path: str, keywords_file_path: str,
              insert_batch_size: int = DEFAULT_INSERT_BATCH_SIZE):
-        movies_loader = MovieLoader(self.mysql_auth.usr, self.mysql_auth.pwd, self.mysql_auth.host,
-                                    self.mysql_auth.port, self.mysql_auth.db)
-        credits_loader = CreditsLoader(self.mysql_auth.usr, self.mysql_auth.pwd, self.mysql_auth.host,
-                                       self.mysql_auth.port, self.mysql_auth.db)
-        keywords_loader = KeywordsLoader(self.mysql_auth.usr, self.mysql_auth.pwd, self.mysql_auth.host,
-                                         self.mysql_auth.port, self.mysql_auth.db)
+        movies_loader = MovieLoader(mysql_helper=self.mysql)
+        credits_loader = CreditsLoader(mysql_helper=self.mysql)
+        keywords_loader = KeywordsLoader(mysql_helper=self.mysql)
 
         logging.info("loading movies...")
         movies_loader.load(movies_file_path, insert_batch_size)
@@ -46,6 +49,9 @@ class KaggleLoader:
         credits_loader.load(credits_file_path, insert_batch_size)
         logging.info("loading keywords...")
         keywords_loader.load(keywords_file_path, insert_batch_size)
+
+        logging.info("applying etls...")
+        self.apply_etls()
 
 
 if __name__ == '__main__':

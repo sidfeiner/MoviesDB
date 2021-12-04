@@ -13,11 +13,12 @@ DEFAULT_INSERT_BATCH_SIZE = 1000
 
 
 class KeywordsLoader:
-    def __init__(self, mysql_usr: str, mysql_pwd: str, mysql_host: Optional[str] = None,
-                 mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, log_level: str = logging.INFO):
+    def __init__(self, mysql_usr: str = '', mysql_pwd: str = '', mysql_host: Optional[str] = None,
+                 mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, mysql_helper: Optional[MySQL] = None,
+                 log_level: str = logging.INFO):
         logging.basicConfig(level=log_level,
                             format="%(asctime)s : %(threadName)s: %(levelname)s : %(name)s : %(module)s : %(message)s")
-        self.mysql_auth = MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db)
+        self.mysql = mysql_helper or MySQL(MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db))
 
     @staticmethod
     def get_ingestion_ddl() -> List[str]:
@@ -35,7 +36,7 @@ class KeywordsLoader:
 
     def load(self, keywords_file_path: str, insert_batch_size: int = DEFAULT_INSERT_BATCH_SIZE):
         keywords = self.get_parsed_keywords_generator(keywords_file_path)
-        with MySQL(self.mysql_auth) as mysql:
+        with self.mysql as mysql:
             crsr = mysql.get_cursor()
             keywords_inserter = BatchObjInserter(mysql, crsr, insert_batch_size, contract.KEYWORDS_TABLE, 50000)
             keyword_keywords_inserter = BatchObjInserter(mysql, crsr, insert_batch_size,
