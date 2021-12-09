@@ -52,9 +52,9 @@ class CreditsLoader:
             jobs_inserter = BatchValueInserter(mysql, crsr, insert_batch_size, contract.JOBS_TABLE,
                                                contract.JOB_COLUMN)
             characters_inserter = BatchValueInserter(mysql, crsr, insert_batch_size, contract.CHARACTERS_TABLE,
-                                                     contract.CHARACTER_COLUMN)
+                                                     contract.CHARACTER_COLUMN, cache_size=200000)
             names_inserter = BatchValueInserter(mysql, crsr, insert_batch_size, contract.NAMES_TABLE,
-                                                contract.NAME_COLUMN)
+                                                contract.NAME_COLUMN, cache_size=200000)
             temp_crew_inserter = BatchObjInserter(mysql, crsr, insert_batch_size, f"temp_{contract.CREW_TABLE}")
             temp_cast_inserter = BatchObjInserter(mysql, crsr, insert_batch_size, f"temp_{contract.CAST_TABLE}")
 

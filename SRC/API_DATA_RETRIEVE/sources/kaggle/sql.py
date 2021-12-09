@@ -49,7 +49,7 @@ create temporary table temp_movies
 """
 
 FINALIZE_MOVIES_TEMP_TABLES_QUERIES = """
-insert into movies.movies(id, is_adult, budget_usd, original_language, original_title_id, overview, popularity,
+insert into movies(id, is_adult, budget_usd, original_language, original_title_id, overview, popularity,
                           release_date, revenue_usd, runtime_minutes, status_id, tagline, title_id, vote_avg,
                           vote_cnt)
 select m.id,
@@ -68,35 +68,35 @@ select m.id,
        m.vote_avg,
        m.vote_cnt
 from temp_movies m
-         left join movies.titles ot on m.original_title = ot.title
-         left join movies.titles t on m.title = t.title
-         left join movies.statuses s on m.status = s.status
+         left join titles ot on m.original_title = ot.title
+         left join titles t on m.title = t.title
+         left join statuses s on m.status = s.status
 on duplicate key update id=m.id;
 
 
-insert into movies.movie_spoken_languages(movie_id, language_id)
+insert into movie_spoken_languages(movie_id, language_id)
 select movie_id, l.id
 from temp_movie_spoken_languages m
-         left join movies.languages l on l.language = m.language
+         left join languages l on l.language = m.language
 on duplicate key update movie_id=m.movie_id;
 
-insert into movies.movie_production_countries(movie_id, country_id)
+insert into movie_production_countries(movie_id, country_id)
 select movie_id, c.id
 from temp_movie_production_countries m
-         left join movies.countries c on m.country = c.country_name
+         left join countries c on m.country = c.country_name
 on duplicate key update movie_id=m.movie_id;
 
 
-insert into movies.movie_production_companies(movie_id, production_company_id)
+insert into movie_production_companies(movie_id, production_company_id)
 select movie_id, c.id
 from temp_movie_production_companies m
-         left join movies.production_companies c on m.production_company = c.production_company
+         left join production_companies c on m.production_company = c.production_company
 on duplicate key update movie_id=m.movie_id;
 
-insert into movies.movie_genres(movie_id, genre_id)
+insert into movie_genres(movie_id, genre_id)
 select movie_id, g.id
 from temp_movie_genres m
-         left join movies.genres g on m.genre = g.genre
+         left join genres g on m.genre = g.genre
 on duplicate key update movie_id=m.movie_id;
 """
 
@@ -124,35 +124,35 @@ create temporary table temp_crew
 """
 
 FINALIZE_CREDITS_TEMP_TABLES_QUERIES = """
-insert into movies.persons(name_id, gender_id) 
+insert into persons(name_id, gender_id) 
 select n.id as name_id, max(m.gender_id)
 from temp_cast m
-        left join movies.names n using (name)
+        left join names n using (name)
 group by 1
 on duplicate key update name_id=name_id;
 
-insert into movies.persons(name_id, gender_id) 
+insert into persons(name_id, gender_id) 
 select n.id as name_id, max(m.gender_id)
 from temp_crew m
-        left join movies.names n using (name)
+        left join names n using (name)
 group by 1
 on duplicate key update name_id=name_id;
 
-insert into movies.cast(person_id, character_name_id, `order`, cast_id, movie_id, id_in_cast)
+insert into `cast`(person_id, character_name_id, `order`, cast_id, movie_id, id_in_cast)
 select p.id, cn.id, m.`order`, m.cast_id, m.movie_id, m.id_in_cast
 from temp_cast m
-         left join movies.names n using (name)
-         left join movies.persons p on n.id = p.name_id
-         left join movies.character_names cn using (character_name)
+         left join names n using (name)
+         left join persons p on n.id = p.name_id
+         left join character_names cn using (character_name)
 on duplicate key update movie_id=m.movie_id;
 
-insert into movies.crew(person_id, job_id, department_id, movie_id, id_in_crew)
+insert into crew(person_id, job_id, department_id, movie_id, id_in_crew)
 select p.id, j.id, d.id, m.movie_id, m.id_in_crew
 from temp_crew m
-         left join movies.names n using (name)
-         left join movies.persons p on n.id = p.name_id
-         left join movies.jobs j using (job)
-         left join movies.departments d using (department)
+         left join names n using (name)
+         left join persons p on n.id = p.name_id
+         left join jobs j using (job)
+         left join departments d using (department)
 on duplicate key update movie_id=m.movie_id;
 """
 
@@ -165,9 +165,9 @@ create temporary table temp_movie_keywords
 """
 
 FINALIZE_KEYWORDS_TEMP_TABLES_QUERIES = """
-insert into movies.movie_keywords(movie_id, keyword_id) 
+insert into movie_keywords(movie_id, keyword_id) 
 select distinct m.movie_id, k.id
 from temp_movie_keywords m
-         left join movies.keywords k using (keyword)
+         left join keywords k using (keyword)
 on duplicate key update movie_id=m.movie_id;
 """

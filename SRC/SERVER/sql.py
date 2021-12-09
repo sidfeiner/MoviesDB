@@ -126,8 +126,8 @@ select genres.genre, round(pct, 2) as pct
 from (
          select distinct genre_id,
                          100 * count(*) over (partition by genre_id) / count(*) over () as pct
-         from movies
-                  join movie_genres mg on movies.id = mg.movie_id
+         from movies m
+                  join movie_genres mg on m.id = mg.movie_id
          {match_clause}
      ) a
          join genres on a.genre_id = genres.id
