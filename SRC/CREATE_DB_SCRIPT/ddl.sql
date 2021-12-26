@@ -1,4 +1,5 @@
 create schema movies;
+use movies;
 
 create table genders
 (
@@ -9,7 +10,8 @@ create table genders
 
 insert into genders(id, gender)
 VALUES (1, 'female'),
-       (2, 'male');
+       (2, 'male'),
+       (3, 'non-binary');
 
 create table names
 (
@@ -24,8 +26,8 @@ create table persons
     id        int not null auto_increment primary key,
     name_id   int,
     gender_id int,
-    foreign key (name_id) references names (id),
-    foreign key (gender_id) references genders (id),
+    foreign key (name_id) references names (id) on delete cascade,
+    foreign key (gender_id) references genders (id) on delete cascade,
     constraint unique (name_id, gender_id)
 );
 
@@ -148,8 +150,8 @@ create table movie_keywords
     movie_id   int,
     keyword_id int,
     constraint unique (movie_id, keyword_id),
-    foreign key (movie_id) references movies (id),
-    foreign key (keyword_id) references keywords (id)
+    foreign key (movie_id) references movies (id) on delete cascade,
+    foreign key (keyword_id) references keywords (id) on delete cascade
 );
 
 
@@ -188,8 +190,8 @@ create table movie_genres
     movie_id int,
     genre_id int,
     constraint unique (movie_id, genre_id),
-    foreign key (movie_id) references movies (id),
-    foreign key (genre_id) references genres (id)
+    foreign key (movie_id) references movies (id) on delete cascade,
+    foreign key (genre_id) references genres (id) on delete cascade
 );
 
 create table movie_production_companies
@@ -198,8 +200,8 @@ create table movie_production_companies
     movie_id              int,
     production_company_id int,
     constraint unique (movie_id, production_company_id),
-    foreign key (movie_id) references movies (id),
-    foreign key (production_company_id) references production_companies (id)
+    foreign key (movie_id) references movies (id) on delete cascade,
+    foreign key (production_company_id) references production_companies (id) on delete cascade
 );
 
 
@@ -210,8 +212,8 @@ create table movie_production_countries
     movie_id   int,
     country_id int,
     constraint unique (movie_id, country_id),
-    foreign key (movie_id) references movies (id),
-    foreign key (country_id) references countries (id)
+    foreign key (movie_id) references movies (id) on delete cascade,
+    foreign key (country_id) references countries (id) on delete cascade
 );
 
 create table movie_spoken_languages
@@ -220,8 +222,8 @@ create table movie_spoken_languages
     movie_id    int,
     language_id int,
     constraint unique (movie_id, language_id),
-    foreign key (movie_id) references movies (id),
-    foreign key (language_id) references languages (id)
+    foreign key (movie_id) references movies (id) on delete cascade,
+    foreign key (language_id) references languages (id) on delete cascade
 );
 
 create table keywords_genre_stats
@@ -233,8 +235,8 @@ create table keywords_genre_stats
     in_tagline_pct      numeric(5, 2),
     in_overview_pct     numeric(5, 2),
     constraint unique (genre_id, keyword_id),
-    foreign key (genre_id) references genres (id),
-    foreign key (keyword_id) references keywords (id)
+    foreign key (genre_id) references genres (id) on delete cascade,
+    foreign key (keyword_id) references keywords (id) on delete cascade
 );
 
 create view v_movies as

@@ -21,10 +21,11 @@ class MySQLAuth:
 
 
 class MySQL:
-    def __init__(self, auth: Optional[MySQLAuth] = None, conn=None):
+    def __init__(self, auth: Optional[MySQLAuth] = None, conn=None, is_shared_connection: bool = False):
         assert auth is not None or conn is not None
         self.auth = auth
         self._conn = conn  # type: Optional[connector.MySQLConnection]
+        self.is_shared_connection = is_shared_connection
 
     def _execute(self, crsr: cursor.CursorBase, sql: str, params: Optional[Tuple] = None):
         return crsr.execute(sql, params) if params is not None else crsr.execute(sql)
@@ -154,20 +155,24 @@ class MySQL:
     def commit(self):
         self._conn.commit()
 
+    def connect(self):
+        self._conn = connector.connect(
+            host=self.auth.host,
+            port=self.auth.port,
+            user=self.auth.usr,
+            password=self.auth.pwd,
+            database=self.auth.db
+        )
+
     def __enter__(self):
         if self._conn is None:
-            self._conn = connector.connect(
-                host=self.auth.host,
-                port=self.auth.port,
-                user=self.auth.usr,
-                password=self.auth.pwd,
-                database=self.auth.db
-            )
+            self.connect()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._conn.close()
-        self._conn = None
+        if not self.is_shared_connection:
+            self._conn.close()
+            self._conn = None
 
 
 class BatchObjInserter:

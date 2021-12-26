@@ -65,7 +65,7 @@ class Credits:
 
 
 class Keyword(Serializable, ToDB):
-    def __init__(self, id: int, name: str):
+    def __init__(self, id: int, name: str, *args, **kwargs):
         self.id = id
         self.name = name.strip()
 
@@ -129,7 +129,7 @@ class MovieProductionCompany(ToDB):
 
 
 class Country(Serializable, ToDB):
-    def __init__(self, name: str, iso_3166_1: str):
+    def __init__(self, name: str, iso_3166_1: str, *args, **kwargs):
         self.name = name.strip()
         self.iso_3166_1 = iso_3166_1.strip()
 
@@ -156,7 +156,7 @@ class MovieProductionCountry(ToDB):
 
 
 class Language(Serializable, ToDB):
-    def __init__(self, name: str, iso_639_1: str):
+    def __init__(self, name: str, iso_639_1: str, *args, **kwargs):
         self.name = name.strip()
         self.iso_639_1 = iso_639_1.strip()
 
@@ -232,7 +232,7 @@ class Movie(ToDB):
         self.popularity = popularity
         self.production_companies = production_companies  # type: List[Company]
         self.production_countries = production_countries  # type: List[Country]
-        self.release_date = release_date
+        self.release_date = release_date if release_date.strip() != "" else None
         self.revenue = revenue
         self.runtime = runtime
         self.spoken_languages = spoken_languages  # type: List[Language]

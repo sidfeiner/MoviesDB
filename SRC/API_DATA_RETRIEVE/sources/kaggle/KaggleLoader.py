@@ -6,9 +6,9 @@ from SRC.API_DATA_RETRIEVE.common.mysql import MySQLAuth, MySQL
 import logging
 
 from SRC.API_DATA_RETRIEVE.contract import DEFAULT_DB
-from SRC.API_DATA_RETRIEVE.sources.kaggle.CreditsLoader import CreditsLoader
-from SRC.API_DATA_RETRIEVE.sources.kaggle.KeywordsLoader import KeywordsLoader
-from SRC.API_DATA_RETRIEVE.sources.kaggle.MovieLoader import MovieLoader
+from SRC.API_DATA_RETRIEVE.sources.kaggle.CreditsLoader import CreditsLoaderImpl
+from SRC.API_DATA_RETRIEVE.sources.kaggle.MovieLoader import MovieLoaderImpl
+from SRC.API_DATA_RETRIEVE.sources.kaggle.KeywordsLoader import KeywordsLoaderImpl
 
 DEFAULT_INSERT_BATCH_SIZE = 2000
 
@@ -29,7 +29,7 @@ class KaggleLoader:
                  mysql_port: Optional[int] = None, mysql_db: str = DEFAULT_DB, log_level: str = logging.INFO):
         logging.basicConfig(level=log_level,
                             format="%(asctime)s : %(threadName)s: %(levelname)s : %(name)s : %(module)s : %(message)s")
-        self.mysql = MySQL(MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db))
+        self.mysql = MySQL(MySQLAuth(mysql_usr, mysql_pwd, mysql_host, mysql_port, mysql_db), is_shared_connection=True)
 
     def apply_etls(self):
         with self.mysql as mysql:
@@ -39,19 +39,20 @@ class KaggleLoader:
 
     def load(self, movies_file_path: str, credits_file_path: str, keywords_file_path: str,
              insert_batch_size: int = DEFAULT_INSERT_BATCH_SIZE):
-        movies_loader = MovieLoader(mysql_helper=self.mysql)
-        credits_loader = CreditsLoader(mysql_helper=self.mysql)
-        keywords_loader = KeywordsLoader(mysql_helper=self.mysql)
+        with self.mysql as mysql:
+            movies_loader = MovieLoaderImpl(movies_file=movies_file_path, mysql_helper=mysql)
+            credits_loader = CreditsLoaderImpl(credits_file=credits_file_path, mysql_helper=mysql)
+            keywords_loader = KeywordsLoaderImpl(keywords_file=keywords_file_path, mysql_helper=mysql)
 
-        logging.info("loading movies...")
-        movies_loader.load(movies_file_path, insert_batch_size)
-        logging.info("loading credits...")
-        credits_loader.load(credits_file_path, insert_batch_size)
-        logging.info("loading keywords...")
-        keywords_loader.load(keywords_file_path, insert_batch_size)
+            logging.info("loading movies...")
+            movies_loader.load(insert_batch_size)
+            logging.info("loading credits...")
+            credits_loader.load(insert_batch_size)
+            logging.info("loading keywords...")
+            keywords_loader.load(insert_batch_size)
 
-        logging.info("applying etls...")
-        self.apply_etls()
+            logging.info("applying etls...")
+            self.apply_etls()
 
 
 if __name__ == '__main__':
