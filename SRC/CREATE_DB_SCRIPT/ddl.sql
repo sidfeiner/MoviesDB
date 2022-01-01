@@ -397,11 +397,9 @@ BEGIN
     call BuildKeywordsMatchingMovies();
 
     -- Build genre_keywords_pct temp table
-    select '2';
     call BuildTempKeywordsRanks();
 
     -- create new temp table to store the final results of our query in table keywords_genre_stats_temp
-    select '3';
     call BuildKeywordsGenreStats();
 
     -- Atomically swap between production table and our newly calculated table
