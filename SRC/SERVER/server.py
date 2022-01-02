@@ -26,7 +26,7 @@ class AppEncoder(flask.json.JSONEncoder):
         return super().default(obj)
 
 
-app = Flask(__name__)
+app = Flask("movie-service")
 app.json_encoder = AppEncoder
 app.config['SWAGGER'] = {
     'openapi': '3.0.0'

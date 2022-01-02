@@ -14,6 +14,7 @@ setup(
         'simplejson>=3.10.0',
         'requests>=2.12.1',
         'mysql-connector-python',
+        'flasgger',
         'Flask',
         'flask-mysql',
         'memoization'
